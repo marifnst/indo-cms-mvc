@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,9 +17,12 @@ public class AuthController {
     @GetMapping("/")
     public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
         ModelAndView output = new ModelAndView();
-        System.out.println(loginModel.getLoginMessage());
+        // System.out.println(loginModel.getLoginMessage());
         if (loginModel != null && loginModel.getLoginMessage() != null) {
-            System.out.println("loginModel.getLoginMessage() : " + loginModel.getLoginMessage());
+            // System.out.println("loginModel.getLoginMessage() : " + loginModel.getLoginMessage());
+            output.addObject("login_message", loginModel.getLoginMessage());
+        } else {
+            output.addObject("login_message", "");
         }
 
         output.setViewName("pages/login");
@@ -30,7 +32,7 @@ public class AuthController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
         ModelAndView output = new ModelAndView();        
-        System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
+        // System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
         String username = loginModel.getUsername();
         String password = loginModel.getPassword();
 
