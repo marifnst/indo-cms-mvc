@@ -29,10 +29,11 @@
           data: JSON.stringify(data),
           contentType: "application/json",
           success: function(responseData, textStatus, jqXHR) {
-              alert("data saved")
+              alert(responseData.message);
+              navigateToUrl(responseData.url);
           },
           error: function(jqXHR, textStatus, errorThrown) {
-              console.log(errorThrown);
+              alert(errorThrown);
           }
       })
     });
@@ -56,19 +57,20 @@
     <section class="content">
       <div class="row">
           <div class="box box-primary">            
-              <form action="template/create/process/TEMPLATE_CODE" method="POST" class="form-horizontal" id="myform">              
+              <!-- <form action="template/create/process/TEMPLATE_CODE" method="POST" class="form-horizontal" id="myform"> -->
+              <form th:action="${url}" method="POST" class="form-horizontal" id="myform">              
                 <div class="box-body">
                   <div class="form-group" th:each="column : ${payload.template_detail}" th:switch="${column.data_type}">
                       <label class="col-sm-2 control-label" th:text="${column.web_column}" style="width: 10%;"></label>
                       <div class="col-sm-10">
-                        <input th:case="STRING" type="text" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}">
-                        <input th:case="INTEGER" type="text" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}">
+                        <input th:case="STRING" type="text" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
+                        <input th:case="INTEGER" type="text" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
                         <!-- <input th:case="DATE" type="text" class="form-control datepicker" th:placeholder="${column.web_column}"> -->
                         <div th:case="DATE" class="input-group date" th:name="${column.database_column}">
                           <div class="input-group-addon">
                             <i class="fa fa-calendar"></i>
                           </div>
-                          <input type="text" class="form-control pull-right datepicker" th:name="${column.database_column}">
+                          <input type="text" class="form-control pull-right datepicker" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
                         </div>
                         <select th:case="LOOKUP" class="form-control select2" th:name="${column.database_column}">
                             <option>- Category -</option>

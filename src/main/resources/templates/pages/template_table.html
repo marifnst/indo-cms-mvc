@@ -44,7 +44,8 @@
                   </thead>
                   <tbody>
                     <tr th:each="row : ${payload.template_data}">
-                      <td><a href="">Edit</a>&nbsp;<a href="">Delete</a></td>
+                      <!-- <td><a href="">Edit</a>&nbsp;<a href="">Delete</a></td> -->
+                      <td><div th:utext="${row.action_row}"></div></td>
                       <td th:each="column : ${payload.template_detail}" th:text="${row[__${column.database_column}__]}"></td>
                     </tr>
                   </tbody>
