@@ -46,6 +46,12 @@ public class TemplateService {
 
     public void createProcessService(String templateCode, String payload) throws Exception {
         HashMap<String,Object> result = new ObjectMapper().readValue(payload, HashMap.class);
+        System.out.println("createProcessService : " + result);
+    }
+
+    public void editProcessService(String templateCode, String dataId, String payload) throws Exception {
+        HashMap<String,Object> result = new ObjectMapper().readValue(payload, HashMap.class);
+        System.out.println("editProcessService : " + result);
     }
 
     public Map<String, Object> editService(String templateCode, String dataId) throws Exception {
@@ -89,7 +95,7 @@ public class TemplateService {
 
         String editColumn = "CONCAT('<a href=\"#\" onclick=\"return navigateToUrl(''template/edit/" + templateCode + "/', row_id, ''')\">Edit</a>')";
 
-        String deleteColumn = "CONCAT('<a href=\"#\" onclick=\"return navigateToUrl(''template/edit/" + templateCode + "/', row_id, ''')\">Delete</a>')";
+        String deleteColumn = "CONCAT('<a href=\"#\" onclick=\"return deleteProcess(''template/delete/process/" + templateCode + "/', row_id, ''')\">Delete</a>')";
         query.append("CONCAT(").append(editColumn).append(",").append("'&nbsp;',").append(deleteColumn).append(") AS ACTION_ROW, ");
         // query.append(deleteColumn).append(" AS ACTION_ROW, ");
 

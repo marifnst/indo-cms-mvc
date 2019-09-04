@@ -7,6 +7,50 @@
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  <script type="text/javascript">
+    $(function () {
+      $('#example1').DataTable();
+
+      $('#example2').DataTable({
+        'paging'      : true,
+        'lengthChange': false,
+        'searching'   : false,
+        'ordering'    : true,
+        'info'        : true,
+        'autoWidth'   : false
+      });
+
+      $('#import').change(function() {
+          var filename = $('#import').val();
+          alert(filename);
+          $('#import').val("")
+      });
+    });
+
+    function deleteProcess(url) {
+      var result = confirm("Are you sure to delete data ?");
+      if (result) {
+        $.ajax({
+            type: "post",
+            url: url,
+            async: false,
+            success: function(responseData, textStatus, jqXHR) {
+                alert(responseData.message);
+                navigateToUrl(responseData.url);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            }
+        });
+      }
+    }
+
+    function importProcess() {
+      $("#import").trigger('click');
+    }
+
+    // https://stackoverflow.com/questions/1960240/jquery-ajax-submit-form
+  </script>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 
@@ -32,7 +76,8 @@
             </div>
             <button type="button" class="btn btn-primary" style="margin-left: 1em" onclick="return navigateToUrl('template/create/TEMPLATE_CODE')">Add Data</button>
             <button type="button" class="btn btn-primary">Export</button>
-            <button type="button" class="btn btn-primary">Import</button>
+            <button type="button" class="btn btn-primary" onclick="importProcess()">Import</button>
+            <input type="file" id="import" style="display:none" />
             <!-- /.box-header -->
             <div class="box-body">            
               <table id="example1" class="table table-bordered table-striped">
@@ -70,18 +115,5 @@
 <!-- DataTables -->
 <script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
-<script>
-  $(function () {
-    $('#example1').DataTable()
-    $('#example2').DataTable({
-      'paging'      : true,
-      'lengthChange': false,
-      'searching'   : false,
-      'ordering'    : true,
-      'info'        : true,
-      'autoWidth'   : false
-    })
-  })
-</script>
 </body>
 </html>
