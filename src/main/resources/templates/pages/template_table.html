@@ -21,9 +21,23 @@
       });
 
       $('#import').change(function() {
-          var filename = $('#import').val();
-          alert(filename);
-          $('#import').val("")
+          var form = $('#import_form')[0];
+          var data = new FormData(form);
+
+          $.ajax({
+            url: $("#import_form").prop("action"),  
+            method: 'post',
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success:function(data){
+                alert('import success');
+            }
+          });
+
+          event.preventDefault();
+          $('#import').val("");
       });
     });
 
@@ -45,7 +59,7 @@
       }
     }
 
-    function importProcess() {
+    function showImportFileDialog() {
       $("#import").trigger('click');
     }
 
@@ -76,8 +90,10 @@
             </div>
             <button type="button" class="btn btn-primary" style="margin-left: 1em" onclick="return navigateToUrl('template/create/TEMPLATE_CODE')">Add Data</button>
             <button type="button" class="btn btn-primary">Export</button>
-            <button type="button" class="btn btn-primary" onclick="importProcess()">Import</button>
-            <input type="file" id="import" style="display:none" />
+            <button type="button" class="btn btn-primary" onclick="showImportFileDialog()">Import</button>
+            <form id="import_form" enctype="multipart/form-data" th:action="${url_import}">
+              <input type="file" name="file" id="import" style="display:none" />
+            </form>
             <!-- /.box-header -->
             <div class="box-body">            
               <table id="example1" class="table table-bordered table-striped">

@@ -9,10 +9,13 @@ import com.indocms.mvcapp.service.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class TemplateRestController {
@@ -64,6 +67,23 @@ public class TemplateRestController {
             System.out.println("deleteProcess : " + templateCode + " : " + dataId);
             output.put("status", "Success");
             output.put("message", "Delete Data Success");
+            output.put("url", "template/view/" + templateCode);
+        } catch (Exception e) {
+            String stringStacktrace = generalService.getStringStacktrace(e);
+            output.put("status", "Failed");
+            output.put("message", stringStacktrace);
+            output.put("url", "general/error");
+        }
+        return output;
+    }
+
+    @PostMapping(value = "/template/import/{templateCode}")
+    public Map<String, String> importProcess(@PathVariable String templateCode, @RequestParam("file") MultipartFile file) {
+        Map<String, String> output = new HashMap<>();
+        try {
+            System.out.println("deleteProcess : " + templateCode + " : " + file.getOriginalFilename());
+            output.put("status", "Success");
+            output.put("message", "Import Data Success");
             output.put("url", "template/view/" + templateCode);
         } catch (Exception e) {
             String stringStacktrace = generalService.getStringStacktrace(e);

@@ -22,6 +22,7 @@ public class TemplateController {
         try {
             Map<String, Object> outputService = templateService.viewService(templateCode);
             output.addObject("payload", outputService);
+            output.addObject("url_import", "template/import/" + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
         }
