@@ -63,6 +63,39 @@
       $("#import").trigger('click');
     }
 
+    function exportProcess() {
+      /*<![CDATA[*/
+      var urlExport = /*[[${url_export}]]*/ "";
+      alert('export process ' + urlExport);
+          // Data to post
+      data = {
+          ids: [1, 2, 3, 4, 5]
+      };
+
+      // Use XMLHttpRequest instead of Jquery $ajax
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+          var a;
+          if (xhttp.readyState === 4 && xhttp.status === 200) {
+              // Trick for making downloadable link
+              a = document.createElement('a');
+              a.href = window.URL.createObjectURL(xhttp.response);
+              // Give filename you wish to download
+              a.download = xhttp.getResponseHeader("filename");
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+          }
+      };
+      // Post data to URL which handles post request
+      xhttp.open("POST", "template/export/template_cpde");
+      xhttp.setRequestHeader("Content-Type", "application/json");
+      // You should set responseType as blob for binary responses
+      xhttp.responseType = 'blob';
+      xhttp.send(JSON.stringify(data));
+      /*]]>*/
+    }
+
     // https://stackoverflow.com/questions/1960240/jquery-ajax-submit-form
   </script>
 </head>
@@ -89,7 +122,7 @@
               <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
             </div>
             <button type="button" class="btn btn-primary" style="margin-left: 1em" onclick="return navigateToUrl('template/create/TEMPLATE_CODE')">Add Data</button>
-            <button type="button" class="btn btn-primary">Export</button>
+            <button type="button" class="btn btn-primary" onclick="exportProcess();">Export</button>
             <button type="button" class="btn btn-primary" onclick="showImportFileDialog()">Import</button>
             <form id="import_form" enctype="multipart/form-data" th:action="${url_import}">
               <input type="file" name="file" id="import" style="display:none" />

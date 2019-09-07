@@ -1,13 +1,21 @@
 package com.indocms.mvcapp.controller;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.indocms.mvcapp.service.GeneralService;
 import com.indocms.mvcapp.service.TemplateService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -92,5 +100,26 @@ public class TemplateRestController {
             output.put("url", "general/error");
         }
         return output;
+    }
+
+    @PostMapping(value = "/template/export/{templateCode}")
+    public ResponseEntity<Object> exportProcess(@PathVariable String templateCode, @RequestBody (required = false) String payload) throws Exception {
+        System.out.println("payload : " + payload);
+
+        File file = new File("tes.txt");
+        Path path = Paths.get(file.getAbsolutePath());
+        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        headers.add("filename", UUID.randomUUID().toString() + ".txt");
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .contentLength(file.length())
+            .contentType(MediaType.parseMediaType("application/octet-stream"))
+            .body(resource);
     }
 }
