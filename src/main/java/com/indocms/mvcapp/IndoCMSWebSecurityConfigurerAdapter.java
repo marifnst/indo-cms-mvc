@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class IndoCMSWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
     @Autowired
     IndoCMSAuthenticationProvider authenticationProvider;
