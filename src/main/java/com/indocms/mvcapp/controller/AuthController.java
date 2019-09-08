@@ -2,6 +2,8 @@ package com.indocms.mvcapp.controller;
 
 import com.indocms.mvcapp.model.LoginModel;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,36 +16,63 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
-    @GetMapping("/")
-    public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
-        ModelAndView output = new ModelAndView();
-        // System.out.println(loginModel.getLoginMessage());
-        if (loginModel != null && loginModel.getLoginMessage() != null) {
-            // System.out.println("loginModel.getLoginMessage() : " + loginModel.getLoginMessage());
-            output.addObject("login_message", loginModel.getLoginMessage());
-        } else {
-            output.addObject("login_message", "");
-        }
+    // @GetMapping("/")
+    // public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
+    //     ModelAndView output = new ModelAndView();
+    //     // System.out.println(loginModel.getLoginMessage());
+    //     if (loginModel != null && loginModel.getLoginMessage() != null) {
+    //         // System.out.println("loginModel.getLoginMessage() : " + loginModel.getLoginMessage());
+    //         output.addObject("login_message", loginModel.getLoginMessage());
+    //     } else {
+    //         output.addObject("login_message", "");
+    //     }
 
-        output.setViewName("pages/login");
-        return output;
-    }
+    //     output.setViewName("pages/login");
+    //     return output;
+    // }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
-        ModelAndView output = new ModelAndView();        
+    // @RequestMapping(value = "/login", method = RequestMethod.GET)
+    // public ModelAndView login() {
+    //     ModelAndView output = new ModelAndView();
+    //     output.setViewName("pages/login");        
+    //     return output;
+    // }
+
+    // @RequestMapping(value = "/login", method = RequestMethod.POST)
+    // public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
+    //     ModelAndView output = new ModelAndView();        
         // System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
-        String username = loginModel.getUsername();
-        String password = loginModel.getPassword();
+        // String username = loginModel.getUsername();
+        // String password = loginModel.getPassword();
 
-        if (username.equals("admin@admin.com") && password.equals("admin")) {
-            output.setViewName("redirect:/home");
+        // if (username.equals("admin@admin.com") && password.equals("admin")) {
+        //     output.setViewName("redirect:/home");
+        // } else {
+        //     output.setViewName("redirect:/");
+        //     loginModel.setLoginMessage("Invalid Username or Password");
+        //     redirectAttributes.addFlashAttribute("login_model_attribute", loginModel);
+        // }
+    //     output.setViewName("redirect:/home");
+    //     return output;
+    // }
+
+    // @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    // public ModelAndView logout() {
+    //     ModelAndView output = new ModelAndView();
+    //     output.setViewName("redirect:/login");        
+    //     return output;
+    // }
+
+    @GetMapping("/user")
+    public Object getUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails) principal).getUsername();
         } else {
-            output.setViewName("redirect:/");
-            loginModel.setLoginMessage("Invalid Username or Password");
-            redirectAttributes.addFlashAttribute("login_model_attribute", loginModel);
+            String username = principal.toString();
         }
-        return output;
+        return principal;
     }
 
     @GetMapping("/register")
