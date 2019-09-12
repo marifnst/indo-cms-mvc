@@ -23,19 +23,23 @@
         }
       );
 
-      $.ajax({
-          type: "post",
-          url: url,
-          data: JSON.stringify(data),
-          contentType: "application/json",
-          success: function(responseData, textStatus, jqXHR) {
-              alert(responseData.message);
-              navigateToUrl(responseData.url);
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-              alert(errorThrown);
-          }
-      })
+      if ($(document.activeElement).val() == "cancel") {
+        navigateToUrl($('#url_cancel').text());
+      } else {
+          $.ajax({
+            type: "post",
+            url: url,
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            success: function(responseData, textStatus, jqXHR) {
+                alert(responseData.message);
+                navigateToUrl(responseData.url);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            }
+          });
+      }
     });
   </script>
 </head>
@@ -64,7 +68,7 @@
                       <label class="col-sm-2 control-label" th:text="${column.web_column}" style="width: 10%;"></label>
                       <div class="col-sm-10">
                         <input th:case="STRING" type="text" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
-                        <input th:case="INTEGER" type="text" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
+                        <input th:case="INTEGER" type="number" class="form-control" th:placeholder="${column.web_column}" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
                         <!-- <input th:case="DATE" type="text" class="form-control datepicker" th:placeholder="${column.web_column}"> -->
                         <div th:case="DATE" class="input-group date" th:name="${column.database_column}">
                           <div class="input-group-addon">
@@ -72,16 +76,20 @@
                           </div>
                           <input type="text" class="form-control pull-right datepicker" th:name="${column.database_column}" th:value="${column.containsKey('edit_data')} ? ${column.edit_data} : ''" />
                         </div>
+                        <!-- <select th:case="LOOKUP" class="form-control select2" th:name="${column.database_column}">
+                          <option>- Category -</option>
+                          <option>Alabama</option>
+                          <option>Alaska</option>
+                          <option>California</option>
+                          <option>Delaware</option>
+                          <option>Tennessee</option>
+                          <option>Texas</option>
+                          <option>Washington</option>
+                        </select> -->
                         <select th:case="LOOKUP" class="form-control select2" th:name="${column.database_column}">
-                            <option>- Category -</option>
-                            <option>Alabama</option>
-                            <option>Alaska</option>
-                            <option>California</option>
-                            <option>Delaware</option>
-                            <option>Tennessee</option>
-                            <option>Texas</option>
-                            <option>Washington</option>
-                          </select>
+                          <option>- Category -</option>
+                          <option th:if="${column.lookup_data != null}" th:each="row : ${column.lookup_data}" th:value="${row.key}" th:text="${row.value}" th:selected="${column.containsKey('edit_data') and row.key == column.edit_data} ? 'selected' : null"></option>
+                        </select>
                       </div>                      
                   </div>
                 <div class="box-footer">
@@ -89,6 +97,7 @@
                   <button name="submit" value="submit" type="submit" class="btn btn-info">Submit</button>
                 </div>
               </form>
+              <div id="url_cancel" th:text="${url_cancel != null } ? ${url_cancel} : ''" style="display: none;"></div>
           </div>
       </div>
     </section>

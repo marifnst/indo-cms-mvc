@@ -2,8 +2,8 @@ package com.indocms.mvcapp.controller;
 
 import com.indocms.mvcapp.model.LoginModel;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+// import org.springframework.security.core.context.SecurityContextHolder;
+// import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,19 +31,19 @@ public class AuthController {
     //     return output;
     // }
 
-    // @RequestMapping(value = "/login", method = RequestMethod.GET)
-    // public ModelAndView login() {
-    //     ModelAndView output = new ModelAndView();
-    //     output.setViewName("pages/login");        
-    //     return output;
-    // }
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public ModelAndView login() {
+        ModelAndView output = new ModelAndView();
+        output.setViewName("login");        
+        return output;
+    }
 
-    // @RequestMapping(value = "/login", method = RequestMethod.POST)
-    // public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
-    //     ModelAndView output = new ModelAndView();        
-        // System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
-        // String username = loginModel.getUsername();
-        // String password = loginModel.getPassword();
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
+        ModelAndView output = new ModelAndView();        
+        System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
+        String username = loginModel.getUsername();
+        String password = loginModel.getPassword();
 
         // if (username.equals("admin@admin.com") && password.equals("admin")) {
         //     output.setViewName("redirect:/home");
@@ -52,9 +52,9 @@ public class AuthController {
         //     loginModel.setLoginMessage("Invalid Username or Password");
         //     redirectAttributes.addFlashAttribute("login_model_attribute", loginModel);
         // }
-    //     output.setViewName("redirect:/home");
-    //     return output;
-    // }
+        output.setViewName("redirect:/home");
+        return output;
+    }
 
     // @RequestMapping(value = "/logout", method = RequestMethod.GET)
     // public ModelAndView logout() {
@@ -63,17 +63,17 @@ public class AuthController {
     //     return output;
     // }
 
-    @GetMapping("/user")
-    public Object getUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    // @GetMapping("/user")
+    // public Object getUser() {
+    //     Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-        } else {
-            String username = principal.toString();
-        }
-        return principal;
-    }
+    //     if (principal instanceof UserDetails) {
+    //         String username = ((UserDetails) principal).getUsername();
+    //     } else {
+    //         String username = principal.toString();
+    //     }
+    //     return principal;
+    // }
 
     @GetMapping("/register")
     public String registerPage() {

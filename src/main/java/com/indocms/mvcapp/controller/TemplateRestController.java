@@ -43,6 +43,7 @@ public class TemplateRestController {
             output.put("message", "Insert Data Success");
             output.put("url", "template/view/" + templateCode);
         } catch (Exception e) {
+            e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
             output.put("status", "Failed");
             output.put("message", stringStacktrace);
@@ -60,6 +61,7 @@ public class TemplateRestController {
             output.put("message", "Edit Data Success");
             output.put("url", "template/view/" + templateCode);
         } catch (Exception e) {
+            e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
             output.put("status", "Failed");
             output.put("message", stringStacktrace);
@@ -72,11 +74,13 @@ public class TemplateRestController {
     public Map<String, String> deleteProcess(@PathVariable String templateCode, @PathVariable String dataId) {
         Map<String, String> output = new HashMap<>();
         try {
-            System.out.println("deleteProcess : " + templateCode + " : " + dataId);
+            // System.out.println("deleteProcess : " + templateCode + " : " + dataId);
+            templateService.deleteProcessService(templateCode, dataId);
             output.put("status", "Success");
             output.put("message", "Delete Data Success");
             output.put("url", "template/view/" + templateCode);
         } catch (Exception e) {
+            e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
             output.put("status", "Failed");
             output.put("message", stringStacktrace);
@@ -89,11 +93,13 @@ public class TemplateRestController {
     public Map<String, String> importProcess(@PathVariable String templateCode, @RequestParam("file") MultipartFile file) {
         Map<String, String> output = new HashMap<>();
         try {
-            System.out.println("deleteProcess : " + templateCode + " : " + file.getOriginalFilename());
+            System.out.println("importProcess : " + templateCode + " : " + file.getOriginalFilename());
+            templateService.importProcessService(templateCode, file);
             output.put("status", "Success");
             output.put("message", "Import Data Success");
             output.put("url", "template/view/" + templateCode);
         } catch (Exception e) {
+            e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
             output.put("status", "Failed");
             output.put("message", stringStacktrace);
@@ -105,8 +111,9 @@ public class TemplateRestController {
     @PostMapping(value = "/template/export/{templateCode}")
     public ResponseEntity<Object> exportProcess(@PathVariable String templateCode, @RequestBody (required = false) String payload) throws Exception {
         System.out.println("payload : " + payload);
+        String exportOutputPath = templateService.exportProcessService(templateCode, payload);
 
-        File file = new File("tes.txt");
+        File file = new File(exportOutputPath);
         Path path = Paths.get(file.getAbsolutePath());
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
         
@@ -114,7 +121,7 @@ public class TemplateRestController {
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
-        headers.add("filename", UUID.randomUUID().toString() + ".txt");
+        headers.add("filename", file.getName());
 
         return ResponseEntity.ok()
             .headers(headers)

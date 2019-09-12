@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
   <script type="text/javascript">
     $(function () {
-      $('#example1').DataTable();
+      $('#example1').DataTable({
+        "scrollX": true
+      });
 
       $('#example2').DataTable({
         'paging'      : true,
@@ -64,36 +66,40 @@
     }
 
     function exportProcess() {
-      /*<![CDATA[*/
-      var urlExport = /*[[${url_export}]]*/ "";
-      alert('export process ' + urlExport);
-          // Data to post
-      data = {
-          ids: [1, 2, 3, 4, 5]
-      };
+      var exportType = $("#export_type").val();
 
-      // Use XMLHttpRequest instead of Jquery $ajax
-      xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-          var a;
-          if (xhttp.readyState === 4 && xhttp.status === 200) {
-              // Trick for making downloadable link
-              a = document.createElement('a');
-              a.href = window.URL.createObjectURL(xhttp.response);
-              // Give filename you wish to download
-              a.download = xhttp.getResponseHeader("filename");
-              a.style.display = 'none';
-              document.body.appendChild(a);
-              a.click();
-          }
-      };
-      // Post data to URL which handles post request
-      xhttp.open("POST", "template/export/template_cpde");
-      xhttp.setRequestHeader("Content-Type", "application/json");
-      // You should set responseType as blob for binary responses
-      xhttp.responseType = 'blob';
-      xhttp.send(JSON.stringify(data));
-      /*]]>*/
+      if (exportType != "-") {
+        var urlExport = $("#url_export").val();
+        // alert('export process ' + urlExport);
+            // Data to post
+        data = {
+            export_type : exportType
+        };
+
+        // Use XMLHttpRequest instead of Jquery $ajax
+        xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            var a;
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                // Trick for making downloadable link
+                a = document.createElement('a');
+                a.href = window.URL.createObjectURL(xhttp.response);
+                // Give filename you wish to download
+                a.download = xhttp.getResponseHeader("filename");
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+            }
+        };
+        // Post data to URL which handles post request
+        xhttp.open("POST", urlExport);
+        xhttp.setRequestHeader("Content-Type", "application/json");
+        // You should set responseType as blob for binary responses
+        xhttp.responseType = 'blob';
+        xhttp.send(JSON.stringify(data));
+      } else {
+        alert("Please Choose Export Type");
+      }
     }
 
     // https://stackoverflow.com/questions/1960240/jquery-ajax-submit-form
@@ -121,15 +127,15 @@
             <div class="box-header">
               <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
             </div>
-            <button type="button" class="btn btn-primary" style="margin-left: 1em" onclick="return navigateToUrl('template/create/TEMPLATE_CODE')">Add Data</button>
-            <button type="button" class="btn btn-primary" onclick="exportProcess();">Export</button>
+            <button type="button" class="btn btn-primary" style="margin-left: 1em" th:attr="onclick='navigateToUrl(\''+${url_create}+'\')'">Add Data</button>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-default">Export</button>
             <button type="button" class="btn btn-primary" onclick="showImportFileDialog()">Import</button>
             <form id="import_form" enctype="multipart/form-data" th:action="${url_import}">
               <input type="file" name="file" id="import" style="display:none" />
             </form>
             <!-- /.box-header -->
             <div class="box-body">            
-              <table id="example1" class="table table-bordered table-striped">
+              <table id="example1" class="table table-bordered table-striped display nowrap" style="width:100%">
                 <thead>
                     <tr>
                       <th></th>
@@ -144,8 +150,10 @@
                     </tr>
                   </tbody>
                   <tfoot>
-                      <tr>
-                      </tr>
+                    <tr>
+                      <th></th>
+                      <th th:each="column : ${payload.template_detail}" th:text="${column.web_column}"></th>
+                    </tr>
                   </tfoot>
               </table>
             </div>
@@ -157,10 +165,34 @@
       </div>
       <!-- /.row -->
     </section>
+
+    <div class="modal fade" id="modal-default">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Export Type</h4>
+          </div>
+          <div class="modal-body">
+            <select class="form-control" id="export_type">
+              <option value="-">-</option>
+              <option value="csv">CSV</option>
+              <option value="xls">XLS</option>
+              <option value="xlsx">XSLX</option>
+            </select>
+            <input type="hidden" id="url_export" th:value="${url_export}" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="exportProcess()">Export</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+      <!-- /.modal-dialog -->
+    </div>
     <!-- /.content -->
-
-<!-- ./wrapper -->
-
 <!-- DataTables -->
 <script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>

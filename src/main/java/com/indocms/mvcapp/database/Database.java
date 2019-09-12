@@ -5,6 +5,8 @@ import java.util.Map;
 
 public interface Database {
     public void executeUpdate(String query) throws Exception;
+    public List<Map<String, Object>> executeUpdate(Map<String, Object> databaseProperty) throws Exception;
+    public Map<String, Object> executeUpdateImport(Map<String, Object> databaseProperty) throws Exception;
     public List<Map<String, Object>> executeQuery(String query) throws Exception;
     public List<Map<String, Object>> executeQuery(Map<String, Object> databaseProperty) throws Exception;
     public String getType();

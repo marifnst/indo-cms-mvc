@@ -22,6 +22,7 @@ public class TemplateController {
         try {
             Map<String, Object> outputService = templateService.viewService(templateCode);
             output.addObject("payload", outputService);
+            output.addObject("url_create", "template/create/" + templateCode);
             output.addObject("url_import", "template/import/" + templateCode);
             output.addObject("url_export", "template/export/" + templateCode);
         } catch (Exception e) {
@@ -37,7 +38,8 @@ public class TemplateController {
         try {
             Map<String, Object> outputService = templateService.createService(templateCode);
             output.addObject("payload", outputService);
-            output.addObject("url", "template/create/process/" + templateCode);            
+            output.addObject("url", "template/create/process/" + templateCode);
+            output.addObject("url_cancel", "template/view/" + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
         }        
