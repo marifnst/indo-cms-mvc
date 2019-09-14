@@ -21,7 +21,7 @@ dynamic menu
 	add
 	edit
 	delete
-	export
+	export (hide dialog)
 	import
 	detail
 	approval

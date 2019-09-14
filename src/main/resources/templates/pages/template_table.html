@@ -10,7 +10,8 @@
   <script type="text/javascript">
     $(function () {
       $('#example1').DataTable({
-        "scrollX": true
+        "scrollX": true,
+        "order": []
       });
 
       $('#example2').DataTable({
@@ -35,6 +36,14 @@
             processData: false,
             success:function(data){
                 alert('import success');
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              if (jqXHR.status == "403") {
+                navigateToUrl('general/unauthorized');
+              } else {
+                alert(jqXHR.trace);
+                navigateToUrl('general/error');
+              }
             }
           });
 
@@ -55,7 +64,12 @@
                 navigateToUrl(responseData.url);
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                alert(errorThrown);
+              if (jqXHR.status == "403") {
+                navigateToUrl('general/unauthorized');
+              } else {
+                alert(jqXHR.trace);
+                navigateToUrl('general/error');
+              }
             }
         });
       }
@@ -88,8 +102,13 @@
                 a.download = xhttp.getResponseHeader("filename");
                 a.style.display = 'none';
                 document.body.appendChild(a);
-                a.click();
-            }
+                a.click();                
+            } else if (xhttp.readyState === 4 && xhttp.status === 403) {
+              // alert('masuk sini');
+              $('#modal-default').hide();
+              $('.modal-backdrop').remove();
+              navigateToUrl('general/unauthorized');
+            }            
         };
         // Post data to URL which handles post request
         xhttp.open("POST", urlExport);
@@ -184,7 +203,7 @@
             <input type="hidden" id="url_export" th:value="${url_export}" />
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
             <button type="button" class="btn btn-primary" onclick="exportProcess()">Export</button>
           </div>
         </div>

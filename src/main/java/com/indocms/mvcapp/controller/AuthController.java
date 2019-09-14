@@ -1,7 +1,16 @@
 package com.indocms.mvcapp.controller;
 
-import com.indocms.mvcapp.model.LoginModel;
+import java.util.List;
+import java.util.Map;
 
+import com.indocms.mvcapp.model.LoginModel;
+import com.indocms.mvcapp.service.MenuService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 // import org.springframework.security.core.context.SecurityContextHolder;
 // import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -16,6 +25,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
+
+    @Autowired
+    private MenuService menuService;
+
     // @GetMapping("/")
     // public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
     //     ModelAndView output = new ModelAndView();
@@ -31,19 +44,19 @@ public class AuthController {
     //     return output;
     // }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ModelAndView login() {
-        ModelAndView output = new ModelAndView();
-        output.setViewName("login");        
-        return output;
-    }
+    // @RequestMapping(value = "/login", method = RequestMethod.GET)
+    // public ModelAndView login() {
+    //     ModelAndView output = new ModelAndView();
+    //     output.setViewName("login");        
+    //     return output;
+    // }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
-        ModelAndView output = new ModelAndView();        
-        System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
-        String username = loginModel.getUsername();
-        String password = loginModel.getPassword();
+    // @RequestMapping(value = "/login", method = RequestMethod.POST)
+    // public ModelAndView login(@ModelAttribute LoginModel loginModel, RedirectAttributes redirectAttributes) {
+    //     ModelAndView output = new ModelAndView();
+    //     System.out.println(loginModel.getUsername() + " : " + loginModel.getPassword());
+    //     String username = loginModel.getUsername();
+    //     String password = loginModel.getPassword();
 
         // if (username.equals("admin@admin.com") && password.equals("admin")) {
         //     output.setViewName("redirect:/home");
@@ -52,9 +65,9 @@ public class AuthController {
         //     loginModel.setLoginMessage("Invalid Username or Password");
         //     redirectAttributes.addFlashAttribute("login_model_attribute", loginModel);
         // }
-        output.setViewName("redirect:/home");
-        return output;
-    }
+    //     output.setViewName("redirect:/home");
+    //     return output;
+    // }
 
     // @RequestMapping(value = "/logout", method = RequestMethod.GET)
     // public ModelAndView logout() {
@@ -86,9 +99,19 @@ public class AuthController {
     }
 
     @GetMapping("/home")
-    public String home(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
-        model.addAttribute("name", name);
-        return "home";
+    public ModelAndView home() {
+        ModelAndView output = new ModelAndView();
+        output.setViewName("home");
+        try {
+            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+            // System.out.println(auth.getName() + " : " + auth.getPrincipal() + " : " + auth.getAuthorities() + " : " + auth.getDetails() + " : " + auth.getCredentials());
+            
+            List<Map<String, Object>> menu = menuService.getMenu();
+            output.addObject("menu", menu);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output;
     }
 
     @GetMapping("/profile")

@@ -30,18 +30,17 @@
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
-    <a href="../../index2.html"><b>Admin</b>LTE</a>
+    <a href=""><b>Indo</b>CMS</a>
   </div>
   <!-- /.login-logo -->
   <div class="login-box-body">
     <p class="login-box-msg">Sign in to start your session</p>
-    <div th:if="${param.error}">
-      Invalid username and password.
+    <div th:if="${param.error}">      
+      <p class="login-box-msg" style="color: red">Invalid username and password.</p>
     </div>
-    <div th:if="${param.logout}">
-        You have been logged out.
-    </div>
-    <p class="login-box-msg" th:text="${login_message}" style="color: red"></p>
+    <div th:if="${param.logout}">        
+        <p class="login-box-msg" style="color: red">You have been logged out.</p>
+    </div>    
 
     <form action="/login" method="post">
       <div class="form-group has-feedback">

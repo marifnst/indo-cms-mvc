@@ -17,7 +17,7 @@ public class IndoCMSPreFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        /*HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         String url = httpServletRequest.getRequestURL().toString();
         String uri = httpServletRequest.getRequestURI().toString();
@@ -41,7 +41,7 @@ public class IndoCMSPreFilter extends GenericFilterBean {
                     return ;
                 }
             }
-        }
+        }*/
         chain.doFilter(request, response);
     }
 

@@ -11,8 +11,8 @@ public class IndoCMSWebMvcConfigurer implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/login").setViewName("login");
         // registry.addViewController("/error").setViewName("pages/500");
-        registry.addViewController("/").setViewName("home");
-        registry.addViewController("/home").setViewName("home");
+        // registry.addViewController("/").setViewName("home");
+        // registry.addViewController("/home").setViewName("home");
         registry.addViewController("/logout").setViewName("login");        
     }
 }

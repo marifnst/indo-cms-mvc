@@ -16,6 +16,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,6 +36,13 @@ public class TemplateRestController {
     @Autowired
     private GeneralService generalService;
 
+    @RequestMapping(value = "/encrypt")
+    public String encrypt(@RequestParam String word) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();        
+        return passwordEncoder.encode(word);
+    }
+
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'insert')")
     @RequestMapping(value = "/template/create/process/{templateCode}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Map<String, String> createProcess(@PathVariable String templateCode, @RequestBody String payload) {
         Map<String, String> output = new HashMap<>();
@@ -52,6 +61,7 @@ public class TemplateRestController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'update')")
     @RequestMapping(value = "/template/edit/process/{templateCode}/{dataId}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public Map<String, String> editProcess(@PathVariable String templateCode, @PathVariable String dataId, @RequestBody String payload) {
         Map<String, String> output = new HashMap<>();
@@ -70,6 +80,7 @@ public class TemplateRestController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'delete')")
     @RequestMapping(value = "/template/delete/process/{templateCode}/{dataId}", method = RequestMethod.POST)
     public Map<String, String> deleteProcess(@PathVariable String templateCode, @PathVariable String dataId) {
         Map<String, String> output = new HashMap<>();
@@ -89,6 +100,7 @@ public class TemplateRestController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'import')")
     @PostMapping(value = "/template/import/{templateCode}")
     public Map<String, String> importProcess(@PathVariable String templateCode, @RequestParam("file") MultipartFile file) {
         Map<String, String> output = new HashMap<>();
@@ -108,6 +120,7 @@ public class TemplateRestController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'export')")
     @PostMapping(value = "/template/export/{templateCode}")
     public ResponseEntity<Object> exportProcess(@PathVariable String templateCode, @RequestBody (required = false) String payload) throws Exception {
         System.out.println("payload : " + payload);

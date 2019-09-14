@@ -5,6 +5,7 @@ import java.util.Map;
 import com.indocms.mvcapp.service.TemplateService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ public class TemplateController {
     @Autowired
     private TemplateService templateService;
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'view')")
     @RequestMapping(value = "/template/view/{templateCode}")
     public ModelAndView viewTemplate(@PathVariable String templateCode) {
         ModelAndView output = new ModelAndView();
@@ -32,6 +34,7 @@ public class TemplateController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'insert')")
     @RequestMapping(value = "/template/create/{templateCode}")
     public ModelAndView createTemplate(@PathVariable String templateCode, Model model) {
         ModelAndView output = new ModelAndView();
@@ -47,6 +50,7 @@ public class TemplateController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('template/view/' + #templateCode, 'update')")
     @RequestMapping(value = "/template/edit/{templateCode}/{dataId}")
     public ModelAndView editTemplate(@PathVariable String templateCode, @PathVariable String dataId, String  model) {
         ModelAndView output = new ModelAndView();

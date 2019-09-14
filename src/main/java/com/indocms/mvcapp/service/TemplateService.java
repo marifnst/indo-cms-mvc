@@ -172,10 +172,10 @@ public class TemplateService {
         }
         query.append(" WHERE row_id = '").append(dataId).append("'");
         templateHeader.put("query", query);
-        System.out.println("query edit : " + query);
+        // System.out.println("query edit : " + query);
 
         List<Map<String, Object>> queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
-        System.out.println("queryOutput edit : " + queryOutput);
+        // System.out.println("queryOutput edit : " + queryOutput);
     }
     //#endregion edit service
 
@@ -190,7 +190,7 @@ public class TemplateService {
         StringBuilder query = new StringBuilder();
         query.append("DELETE FROM ").append(databaseName).append(databaseTableDelimiter).append(tableName);
         query.append(" WHERE row_id = '").append(dataId).append("'");
-        System.out.println("query delete : " + query);
+        // System.out.println("query delete : " + query);
         templateHeader.put("query", query);
 
         List<Map<String, Object>> queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
@@ -217,6 +217,7 @@ public class TemplateService {
     }
     //#endregion
 
+    //#region import process
     public String importProcessService(String templateCode, MultipartFile file) throws Exception {
         String output = null;
         
@@ -241,6 +242,7 @@ public class TemplateService {
         }
         return output;
     }
+    //#endregion import process
 
     public Map<String, Object> getTemplateHeader(String templateCode) throws Exception {
         Map<String, Object> output = new HashMap<>();
