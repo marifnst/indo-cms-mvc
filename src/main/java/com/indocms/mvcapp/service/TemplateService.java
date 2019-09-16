@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,8 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -31,11 +34,20 @@ public class TemplateService {
     @Value("${app.export.pattern.date}")
     private String exportPatternDate;
 
+    @Value("${app.breadcrumb.delimiter}")
+    private String breadcrumbDelimiter;
+
     @Autowired
     private ExportService exportService;
 
     @Autowired
     private ImportService importService;
+    
+    @Autowired
+    private MenuService menuService;
+
+    @Autowired
+    private ApprovalService approvalService;
 
     @Autowired
     private GeneralService generalService;
@@ -52,8 +64,20 @@ public class TemplateService {
         List<Map<String, Object>> templateDetail = this.getTemplateDetail(templateCode, templateDetailFilter);
         output.put("template_detail", templateDetail);
 
-        List<Map<String, Object>> templateData = this.getTemplateData(templateHeader, templateDetail);
+        String url = "template/view/" + templateCode;
+        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();        
+        List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) attr.getRequest().getSession().getAttribute(url);
+        Map<String, Object> menuPermission = menuPermissionList.get(0);
+
+        String breadcrumb = menuPermission.get("menu_breadcrumb").toString();
+        menuPermission.put("menu_breadcrumb_list", Arrays.asList(breadcrumb.split("\\" + breadcrumbDelimiter)));        
+
+        List<Map<String, Object>> templateData = this.getTemplateData(templateHeader, templateDetail, menuPermissionList);
         output.put("template_data", templateData);
+        output.put("menu", menuPermission);
+        // output.put("can_insert", canInsert);
+        // output.put("can_export", canExport);
+        // output.put("can_import", canImport);
 
         return output;
     }
@@ -80,7 +104,9 @@ public class TemplateService {
         return output;
     }
 
-    public void createProcessService(String templateCode, String payload) throws Exception {
+    public Map<String, String> createProcessService(String url, String templateCode, String payload) throws Exception {
+        Map<String, String> output = new HashMap<>();
+
         HashMap<String,Object> payloadMap = new ObjectMapper().readValue(payload, HashMap.class);
         System.out.println("createProcessService : " + payloadMap);
         
@@ -112,11 +138,22 @@ public class TemplateService {
         queryValues.append(")");
 
         query.append(" VALUES ").append(queryValues.toString());
-        System.out.println("query insert : " + query);
+        // System.out.println("query insert : " + query);
         templateHeader.put("query", query);
 
-        List<Map<String, Object>> queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
-        System.out.println("queryOutput : " + queryOutput);        
+        List<Map<String, Object>> queryOutput = null;
+        if (menuService.isNeedApproval(url)) {
+            approvalService.crudApprovalnjection(templateCode, "INSERT", "NULL", "'" + payload + "'", "NULL", query.toString());
+            output.put("status", "Success");
+            output.put("message", "Insert Request Has Been Submitted, Please Kindly Wait For Approval");
+        } else {
+            queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            output.put("status", "Success");
+            output.put("message", "Insert Data Success");
+        }        
+        System.out.println("queryOutput : " + queryOutput);
+        
+        return output;
     }
 
     //#endregion create servcie
@@ -145,11 +182,13 @@ public class TemplateService {
         return output;
     }
 
-    public void editProcessService(String templateCode, String dataId, String payload) throws Exception {
+    public Map<String, String> editProcessService(String url, String templateCode, String dataId, String payload) throws Exception {
+        Map<String, String> output = new HashMap<>();
+
         HashMap<String,Object> payloadMap = new ObjectMapper().readValue(payload, HashMap.class);
         System.out.println("editProcessService : " + payloadMap);
 
-        Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);
+        Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);        
 
         String databaseName = templateHeader.get("database_name").toString().trim();
         String databaseTableDelimiter = templateHeader.get("database_table_delimiter").toString().trim();
@@ -174,13 +213,28 @@ public class TemplateService {
         templateHeader.put("query", query);
         // System.out.println("query edit : " + query);
 
-        List<Map<String, Object>> queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+        List<Map<String, Object>> queryOutput = null;
+        if (menuService.isNeedApproval(url)) {
+            String templateDetailFilter = " AND CASE WHEN is_edit = '1' THEN '1' WHEN is_primary = '1' THEN '1' ELSE '0' END = '1'";
+            List<Map<String, Object>> templateDetail = this.getTemplateDetail(templateCode, templateDetailFilter);
+
+            Map<String, Object> dataBefore = this.getDataById(templateHeader, templateDetail, dataId);
+            approvalService.crudApprovalnjection(templateCode, "UPDATE", "'" + dataBefore.toString() + "'", "'" + payload + "'", "NULL", query.toString());
+            output.put("status", "Success");
+            output.put("message", "Edit Request Has Been Submitted, Please Kindly Wait For Approval");
+        } else {
+            queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            output.put("status", "Success");
+            output.put("message", "Edit Data Success");
+        }        
         // System.out.println("queryOutput edit : " + queryOutput);
+        return output;
     }
     //#endregion edit service
 
     //#region delete service
-    public void deleteProcessService(String templateCode, String dataId) throws Exception {
+    public Map<String, String> deleteProcessService(String url, String templateCode, String dataId) throws Exception {
+        Map<String, String> output = new HashMap<>();
         Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);
 
         String databaseName = templateHeader.get("database_name").toString().trim();
@@ -193,8 +247,22 @@ public class TemplateService {
         // System.out.println("query delete : " + query);
         templateHeader.put("query", query);
 
-        List<Map<String, Object>> queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+        List<Map<String, Object>> queryOutput = null;
+        if (menuService.isNeedApproval(url)) {
+            String templateDetailFilter = " AND is_show = '1'";
+            List<Map<String, Object>> templateDetail = this.getTemplateDetail(templateCode, templateDetailFilter);
+
+            Map<String, Object> dataBefore = this.getDataById(templateHeader, templateDetail, dataId);
+
+            approvalService.crudApprovalnjection(templateCode, "DELETE", "'" + dataBefore.toString() + "'", "NULL", "NULL", query.toString());
+            output.put("status", "Success");
+            output.put("message", "Delete Request Has Been Submitted, Please Kindly Wait For Approval");
+        } else {
+            queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+        }        
         System.out.println("queryOutput delete : " + queryOutput);
+
+        return output;
     }
     //#endregion delete service
     
@@ -218,8 +286,8 @@ public class TemplateService {
     //#endregion
 
     //#region import process
-    public String importProcessService(String templateCode, MultipartFile file) throws Exception {
-        String output = null;
+    public Map<String, String> importProcessService(String url, String templateCode, MultipartFile file) throws Exception {
+        Map<String, String> output = new HashMap<>();
         
         InputStream initialStream = file.getInputStream();
         
@@ -230,15 +298,24 @@ public class TemplateService {
         Files.copy(initialStream, exportPath, StandardCopyOption.REPLACE_EXISTING);        
         IOUtils.closeQuietly(initialStream);
 
-        switch(importFileExtension.toLowerCase()) {
-            case "csv":{                
-                importService.importCSV(templateCode, exportPathString);
-                break;
+        if (menuService.isNeedApproval(url)) {
+            approvalService.crudApprovalnjection(templateCode, "IMPORT", "NULL", "NULL", "'" + exportPathString + "'", "NULL");
+            output.put("status", "Success");
+            output.put("message", "Import Request Has Been Submitted, Please Kindly Wait For Approval");
+        } else {
+            switch(importFileExtension.toLowerCase()) {
+                case "csv":{                
+                    importService.importCSV(templateCode, exportPathString);
+                    break;
+                }
+                case "xls":case "xlsx": {
+                    importService.importExcel(templateCode, exportPathString);
+                    break;
+                }
             }
-            case "xls":case "xlsx": {
-                importService.importExcel(templateCode, exportPathString);
-                break;
-            }
+
+            output.put("status", "Success");
+            output.put("message", "Import Data Success");
         }
         return output;
     }
@@ -275,7 +352,7 @@ public class TemplateService {
         return output;
     }
 
-    public List<Map<String, Object>> getTemplateData(Map<String, Object> templateHeader, List<Map<String, Object>> templateDetail)  throws Exception {
+    public List<Map<String, Object>> getTemplateData(Map<String, Object> templateHeader, List<Map<String, Object>> templateDetail, List<Map<String, Object>> menuPermissionList)  throws Exception {
         StringBuilder query = new StringBuilder();
         String templateCode = templateHeader.get("template_code").toString();
                 
@@ -284,7 +361,19 @@ public class TemplateService {
         String editColumn = "CONCAT('<a href=\"#\" onclick=\"return navigateToUrl(''template/edit/" + templateCode + "/', row_id, ''')\">Edit</a>')";
 
         String deleteColumn = "CONCAT('<a href=\"#\" onclick=\"return deleteProcess(''template/delete/process/" + templateCode + "/', row_id, ''')\">Delete</a>')";
-        query.append("CONCAT(").append(editColumn).append(",").append("'&nbsp;',").append(deleteColumn).append(") AS ACTION_ROW, ");
+        
+        String canUpdate = menuPermissionList.get(0).get("can_update") != null && !menuPermissionList.get(0).get("can_update").equals("") ? menuPermissionList.get(0).get("can_update").toString() : "0";
+        String canDelete = menuPermissionList.get(0).get("can_delete") != null && !menuPermissionList.get(0).get("can_delete").equals("") ? menuPermissionList.get(0).get("can_delete").toString() : "0";
+
+        if (canUpdate.equals("1") && canDelete.equals("1")) {
+            query.append("CONCAT(").append(editColumn).append(",").append("'&nbsp;',").append(deleteColumn).append(") AS ACTION_ROW, ");
+        } else if (canUpdate.equals("1") && canDelete.equals("0")) {
+            query.append(editColumn).append(" AS ACTION_ROW, ");
+        }  else if (canUpdate.equals("0") && canDelete.equals("1")) {
+            query.append(deleteColumn).append(" AS ACTION_ROW, ");
+        } else {
+            query.append("'' AS ACTION_ROW, ");
+        }
         // query.append(deleteColumn).append(" AS ACTION_ROW, ");
 
         for (int i= 0;i < templateDetail.size(); i++) {
@@ -355,5 +444,39 @@ public class TemplateService {
 
         // remove primary in template detail
         templateDetail.remove(primaryIndex);
+    }
+
+    public Map<String, Object> getDataById(Map<String, Object> templateHeader, List<Map<String, Object>> templateDetail, String dataId)  throws Exception {
+        String databaseName = templateHeader.get("database_name").toString().trim();
+        String databaseTableDelimiter = templateHeader.get("database_table_delimiter").toString().trim();
+        String tableName = templateHeader.get("table_name").toString().trim();
+
+        StringBuilder query = new StringBuilder();
+
+        String primaryKeyColumn = null;
+        query.append("SELECT ");
+        for (int i= 0;i < templateDetail.size(); i++) {
+            String queryColumn = templateDetail.get(i).get("query_column").toString().trim();
+            String databaseColumn = templateDetail.get(i).get("database_column").toString().trim();
+            if (templateDetail.get(i).get("is_primary") != null && templateDetail.get(i).get("is_primary").toString().equals("1")) {
+                primaryKeyColumn = templateDetail.get(i).get("database_column").toString();
+            } else {
+                query.append(queryColumn).append(" AS ").append(databaseColumn);
+
+                if (i + 1 < templateDetail.size()) {
+                    query.append(", ");
+                }
+            }
+        }
+        query.append(" FROM ").append(databaseName).append(databaseTableDelimiter).append(tableName);
+        query.append(" WHERE ").append(primaryKeyColumn).append(" = '").append(dataId).append("'");
+
+        // System.out.println("get edit data query : " + query);
+        templateHeader.put("query", query);
+
+        List<Map<String, Object>> selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        Map<String, Object> mainData = selectOutput.get(0);
+
+        return mainData;
     }
 }

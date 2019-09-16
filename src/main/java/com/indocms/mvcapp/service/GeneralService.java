@@ -5,10 +5,20 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GeneralService {
+
+    @Autowired
+    private Environment environment;
+    
+    public String getAppProperty(String propertyName) {
+        return environment.getProperty(propertyName);
+    }
+
     public String getStringStacktrace(Exception exception) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

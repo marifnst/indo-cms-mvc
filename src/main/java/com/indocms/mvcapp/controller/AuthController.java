@@ -103,10 +103,10 @@ public class AuthController {
         ModelAndView output = new ModelAndView();
         output.setViewName("home");
         try {
-            UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+            // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();            
             // System.out.println(auth.getName() + " : " + auth.getPrincipal() + " : " + auth.getAuthorities() + " : " + auth.getDetails() + " : " + auth.getCredentials());
             
-            List<Map<String, Object>> menu = menuService.getMenu();
+            List<Map<String, Object>> menu = menuService.getMenuByAuthority();
             output.addObject("menu", menu);
         } catch (Exception e) {
             e.printStackTrace();

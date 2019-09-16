@@ -1,4 +1,4 @@
-package com.indocms.mvcapp;
+package com.indocms.mvcapp.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

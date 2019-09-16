@@ -36,7 +36,12 @@
                 navigateToUrl(responseData.url);
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                alert(errorThrown);
+              if (jqXHR.status == "403") {
+                navigateToUrl('general/unauthorized');
+              } else {
+                alert(jqXHR.trace);
+                navigateToUrl('general/error');
+              }
             }
           });
       }

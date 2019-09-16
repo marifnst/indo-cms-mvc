@@ -1,4 +1,4 @@
-package com.indocms.mvcapp;
+package com.indocms.mvcapp.security;
 
 import java.io.Serializable;
 import java.util.List;
@@ -28,11 +28,10 @@ public class IndoCMSPermissionEvaluator implements PermissionEvaluator {
         // System.out.println("authorities : " + authentication.getAuthorities());
 
         List<GrantedAuthority> authority = (List<GrantedAuthority>) authentication.getAuthorities();
-        try {
-            // System.out.println(permission.toString());
-            if (menuService == null) {
-                System.out.println("menuService is null");
-            }
+        try {            
+            // if (menuService == null) {
+            //     System.out.println("menuService is null");
+            // }
             output = menuService.isAuthorized(authority.get(0).getAuthority(), targetDomainObject.toString(), permission.toString());
         } catch (Exception e) {
             e.printStackTrace();            

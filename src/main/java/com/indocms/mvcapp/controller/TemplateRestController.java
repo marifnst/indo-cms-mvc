@@ -12,6 +12,7 @@ import com.indocms.mvcapp.service.GeneralService;
 import com.indocms.mvcapp.service.TemplateService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +31,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class TemplateRestController {
 
+    @Value("${app.view.url.template.prefix}")
+    private String viewUrlTemplatePrefix;
+
+    @Value("${app.create.form.url.template.prefix}")
+    private String createFormUrlTemplatePrefix;
+
     @Autowired
     private TemplateService templateService;
 
@@ -47,10 +54,31 @@ public class TemplateRestController {
     public Map<String, String> createProcess(@PathVariable String templateCode, @RequestBody String payload) {
         Map<String, String> output = new HashMap<>();
         try {
-            templateService.createProcessService(templateCode, payload);
-            output.put("status", "Success");
-            output.put("message", "Insert Data Success");
-            output.put("url", "template/view/" + templateCode);
+            output = templateService.createProcessService(viewUrlTemplatePrefix + templateCode, templateCode, payload);
+            // output.put("status", "Success");
+            // output.put("message", "Insert Data Success");
+            // output.put("url", "template/view/" + templateCode);
+            output.put("url", viewUrlTemplatePrefix + templateCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            String stringStacktrace = generalService.getStringStacktrace(e);
+            output.put("status", "Failed");
+            output.put("message", stringStacktrace);
+            output.put("url", "general/error");
+        }
+        return output;
+    }
+
+    @PreAuthorize("hasPermission('template/form/create/' + #templateCode, 'insert')")
+    @RequestMapping(value = "/template/form/create/process/{templateCode}", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public Map<String, String> formCreateProcess(@PathVariable String templateCode, @RequestBody String payload) {
+        Map<String, String> output = new HashMap<>();
+        try {
+            output = templateService.createProcessService(createFormUrlTemplatePrefix + templateCode, templateCode, payload);
+            // output.put("status", "Success");
+            // output.put("message", "Insert Data Success");
+            // output.put("url", "template/view/" + templateCode);
+            output.put("url", viewUrlTemplatePrefix + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
@@ -66,10 +94,11 @@ public class TemplateRestController {
     public Map<String, String> editProcess(@PathVariable String templateCode, @PathVariable String dataId, @RequestBody String payload) {
         Map<String, String> output = new HashMap<>();
         try {
-            templateService.editProcessService(templateCode, dataId, payload);
-            output.put("status", "Success");
-            output.put("message", "Edit Data Success");
-            output.put("url", "template/view/" + templateCode);
+            output = templateService.editProcessService(viewUrlTemplatePrefix + templateCode, templateCode, dataId, payload);
+            // output.put("status", "Success");
+            // output.put("message", "Edit Data Success");
+            // output.put("url", "template/view/" + templateCode);
+            output.put("url", viewUrlTemplatePrefix + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
@@ -86,10 +115,11 @@ public class TemplateRestController {
         Map<String, String> output = new HashMap<>();
         try {
             // System.out.println("deleteProcess : " + templateCode + " : " + dataId);
-            templateService.deleteProcessService(templateCode, dataId);
-            output.put("status", "Success");
-            output.put("message", "Delete Data Success");
-            output.put("url", "template/view/" + templateCode);
+            output = templateService.deleteProcessService(viewUrlTemplatePrefix + templateCode, templateCode, dataId);
+            // output.put("status", "Success");
+            // output.put("message", "Delete Data Success");
+            // output.put("url", "template/view/" + templateCode);
+            output.put("url", viewUrlTemplatePrefix + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);
@@ -106,10 +136,11 @@ public class TemplateRestController {
         Map<String, String> output = new HashMap<>();
         try {
             System.out.println("importProcess : " + templateCode + " : " + file.getOriginalFilename());
-            templateService.importProcessService(templateCode, file);
-            output.put("status", "Success");
-            output.put("message", "Import Data Success");
-            output.put("url", "template/view/" + templateCode);
+            output = templateService.importProcessService(viewUrlTemplatePrefix + templateCode, templateCode, file);
+            // output.put("status", "Success");
+            // output.put("message", "Import Data Success");
+            // output.put("url", "template/view/" + templateCode);
+            output.put("url", viewUrlTemplatePrefix + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
             String stringStacktrace = generalService.getStringStacktrace(e);

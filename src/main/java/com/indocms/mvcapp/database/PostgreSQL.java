@@ -27,8 +27,40 @@ public class PostgreSQL implements Database {
     private GeneralService generalService;
 
     @Override
-    public void executeUpdate(String query) throws Exception {
+    public List<Map<String, Object>> executeUpdate(String query) throws Exception {
+        Connection connection = null;
+        List<Map<String, Object>> output = new ArrayList<>();
 
+        try {
+            String className = environment.getProperty("app.database.classname");
+            String connectionString = environment.getProperty("app.database.connection.string");
+            String username = environment.getProperty("app.database.username");
+            String password = environment.getProperty("app.database.password");
+    
+            // Class.forName("org.postgresql.Driver");
+            // Connection connection = DriverManager.getConnection("jdbc:postgresql://172.24.0.2:5432/INDO_CMS", "postgres", "password");
+            Class.forName(className);
+            connection = DriverManager.getConnection(connectionString, username, password);
+    
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+
+            while (resultSet.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1;i <= resultSetMetaData.getColumnCount();i++) {
+                    String columnLabel = resultSetMetaData.getColumnLabel(i);
+                    row.put(columnLabel, resultSet.getObject(i));
+                }
+                output.add(row);
+            }
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }            
+        }
+        return output;
     }
 
     @Override

@@ -1,6 +1,6 @@
 security
 	encrypt & decrypt connection string
-	profile
+	user profile
 menu
 	title
 	breadcrumb

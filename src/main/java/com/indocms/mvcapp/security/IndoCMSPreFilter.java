@@ -1,4 +1,4 @@
-package com.indocms.mvcapp;
+package com.indocms.mvcapp.security;
 
 import java.io.IOException;
 

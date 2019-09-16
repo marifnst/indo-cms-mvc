@@ -34,10 +34,10 @@
             cache: false,
             contentType: false,
             processData: false,
-            success:function(data){
-                alert('import success');
+            success : function(responseData, textStatus, jqXHR){
+              alert(responseData.message);
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error : function(jqXHR, textStatus, errorThrown) {
               if (jqXHR.status == "403") {
                 navigateToUrl('general/unauthorized');
               } else {
@@ -94,21 +94,27 @@
         xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             var a;
-            if (xhttp.readyState === 4 && xhttp.status === 200) {
-                // Trick for making downloadable link
-                a = document.createElement('a');
-                a.href = window.URL.createObjectURL(xhttp.response);
-                // Give filename you wish to download
-                a.download = xhttp.getResponseHeader("filename");
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();                
-            } else if (xhttp.readyState === 4 && xhttp.status === 403) {
-              // alert('masuk sini');
+            if (xhttp.readyState === 4) {
+              switch(xhttp.status) {
+                case 200:{
+                  // Trick for making downloadable link
+                  a = document.createElement('a');
+                  a.href = window.URL.createObjectURL(xhttp.response);
+                  // Give filename you wish to download
+                  a.download = xhttp.getResponseHeader("filename");
+                  a.style.display = 'none';
+                  document.body.appendChild(a);
+                  a.click();                
+                  break;
+                }
+                case 403:{
+                  navigateToUrl('general/unauthorized');
+                  break;
+                }
+              }
               $('#modal-default').hide();
               $('.modal-backdrop').remove();
-              navigateToUrl('general/unauthorized');
-            }            
+            }
         };
         // Post data to URL which handles post request
         xhttp.open("POST", urlExport);
@@ -128,13 +134,14 @@
 
     <section class="content-header">
       <h1>
-        Role
-        <small>Role Management</small>
+        [[${payload.menu.menu_title}]]
+        <small>[[${payload.menu.menu_subtitle}]]</small>
       </h1>
       <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li><a href="#">Tables</a></li>
-        <li class="active">Data tables</li>
+        <!-- <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="#">Tables</a></li> -->
+        <li><i class="fa fa-dashboard"></i></li>
+        <li th:each="breadcrumb : ${payload.menu.menu_breadcrumb_list}" class="active">[[${breadcrumb}]]</li>
       </ol>
     </section>
 
@@ -146,10 +153,10 @@
             <div class="box-header">
               <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
             </div>
-            <button type="button" class="btn btn-primary" style="margin-left: 1em" th:attr="onclick='navigateToUrl(\''+${url_create}+'\')'">Add Data</button>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-default">Export</button>
-            <button type="button" class="btn btn-primary" onclick="showImportFileDialog()">Import</button>
-            <form id="import_form" enctype="multipart/form-data" th:action="${url_import}">
+            <button th:if="${payload.menu.can_insert != null and payload.menu.can_insert.equals('1')}" type="button" class="btn btn-primary" style="margin-left: 1em" th:attr="onclick='navigateToUrl(\''+${url_create}+'\')'">Add Data</button>
+            <button th:if="${payload.menu.can_export != null and payload.menu.can_export.equals('1')}" type="button" class="btn btn-primary" data-toggle="modal" style="margin-left: 1em"  data-target="#modal-default">Export</button>
+            <button th:if="${payload.menu.can_import != null and payload.menu.can_import.equals('1')}" type="button" class="btn btn-primary" style="margin-left: 1em" onclick="showImportFileDialog()">Import</button>
+            <form th:if="${payload.menu.can_import != null and payload.menu.can_import.equals('1')}" id="import_form" enctype="multipart/form-data" th:action="${url_import}">
               <input type="file" name="file" id="import" style="display:none" />
             </form>
             <!-- /.box-header -->
