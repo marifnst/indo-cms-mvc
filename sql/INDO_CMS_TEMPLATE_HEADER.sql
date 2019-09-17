@@ -2,6 +2,10 @@ INSERT INTO "indo_cms_template_header" ("template_code", "database_name", "datab
 VALUES 
 ('INDO_CMS_USER', '"INDO_CMS"', '.PUBLIC.', 'INDO_CMS_USER', 'com.indocms.mvcapp.database.PostgreSQL', 'org.postgresql.Driver', 'jdbc:postgresql://172.24.0.2:5432/INDO_CMS_DATA', 'postgres', 'password');
 
+INSERT INTO "indo_cms_template_header" ("template_code", "database_name", "database_table_delimiter", "table_name", "database_service", "database_classname", "database_connection_string", "database_username", "database_password")
+VALUES 
+('INDO_CMS_USER_APPROVER', '"INDO_CMS"', '.PUBLIC.', 'INDO_CMS_USER_APPROVER', 'com.indocms.mvcapp.database.PostgreSQL', 'org.postgresql.Driver', 'jdbc:postgresql://172.24.0.2:5432/INDO_CMS', 'postgres', 'password');
+
 INSERT INTO "indo_cms_template_header" 
 ("template_code", "database_name", "database_table_delimiter", "table_name", "database_service", "database_classname", "database_connection_string", "database_username", "database_password")
 VALUES 

@@ -1,6 +1,8 @@
 package com.indocms.mvcapp.service;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,5 +38,15 @@ public class ApprovalService {
         System.out.println("crudApprovalnjection : " + queryFinal);
         
         DatabaseFactoryService.getService(databaseService).executeUpdate(queryFinal);
+    }
+
+    public List<Map<String, Object>> getApprovalTaskList() throws Exception {
+        // String username = authService.getCurrentUser();
+        StringBuilder query = new StringBuilder("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_STATUS = 'PENDING' ORDER BY APPROVAL_CREATED_DATE DESC");
+        List<Map<String, Object>> approvalTaskList = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+        // System.out.println("approvalTaskList : " + approvalTaskList);
+        // Map<String, Object> output = new HashMap<>();
+        // output.put("approval_task_list", approvalTaskList);
+        return approvalTaskList;
     }
 }

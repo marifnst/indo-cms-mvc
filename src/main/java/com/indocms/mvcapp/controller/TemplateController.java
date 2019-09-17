@@ -27,6 +27,9 @@ public class TemplateController {
     @Value("${app.import.url.template.prefix}")
     private String importUrlTemplatePrefix;
 
+    @Value("${app.create.form.url.template.prefix}")
+    private String createFormUrlTemplatePrefix;
+
     @Autowired
     private TemplateService templateService;
 
@@ -55,7 +58,7 @@ public class TemplateController {
     public ModelAndView createTemplate(@PathVariable String templateCode, Model model) {
         ModelAndView output = new ModelAndView();
         try {
-            Map<String, Object> outputService = templateService.createService(templateCode);
+            Map<String, Object> outputService = templateService.createService(templateCode, viewUrlTemplatePrefix + templateCode);
             output.addObject("payload", outputService);
             output.addObject("url", "template/create/process/" + templateCode);
             // output.addObject("url_cancel", "template/view/" + templateCode);
@@ -72,11 +75,11 @@ public class TemplateController {
     public ModelAndView formCreateTemplate(@PathVariable String templateCode, Model model) {
         ModelAndView output = new ModelAndView();
         try {
-            Map<String, Object> outputService = templateService.createService(templateCode);
+            Map<String, Object> outputService = templateService.createService(templateCode, createFormUrlTemplatePrefix + templateCode);
             output.addObject("payload", outputService);
             output.addObject("url", "template/form/create/process/" + templateCode);
             // output.addObject("url_cancel", "template/view/" + templateCode);
-            output.addObject("url_cancel", viewUrlTemplatePrefix + templateCode);
+            output.addObject("url_cancel", createFormUrlTemplatePrefix + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
         }        
@@ -89,7 +92,7 @@ public class TemplateController {
     public ModelAndView editTemplate(@PathVariable String templateCode, @PathVariable String dataId, String  model) {
         ModelAndView output = new ModelAndView();
         try {
-            Map<String, Object> outputService = templateService.editService(templateCode, dataId);
+            Map<String, Object> outputService = templateService.editService(templateCode, dataId, viewUrlTemplatePrefix + templateCode);
             output.addObject("payload", outputService);
             output.addObject("url", "template/edit/process/" + templateCode + "/" + dataId);
         } catch (Exception e) {

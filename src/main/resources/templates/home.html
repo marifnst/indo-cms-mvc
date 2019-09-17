@@ -57,7 +57,12 @@
         if (xhr.status == "403") {
           navigateToUrl('general/unauthorized');
         } else {
-          alert(xhr.trace);
+          alert(xhr.responseText);
+          // if (xhr.trace != null) {
+          //   alert(xhr.trace);
+          // } else {
+          //   alert(xhr.message);
+          // }
           navigateToUrl('general/error');
         }
       },

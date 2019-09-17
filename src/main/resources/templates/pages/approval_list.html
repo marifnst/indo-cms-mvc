@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  <script type="text/javascript">
+    function onClickApprove(row_id) {
+      alert('approve ' + row_id);      
+    }
+
+    function onClickReject(row_id) {
+      // alert('reject ' + row_id);
+      $("#reject_row_id").val(row_id);
+      $("#modal-default").modal('toggle');
+    }
+
+    function rejectProcess() {
+      alert($("#reject_row_id").val());
+      $("#modal-default").modal('toggle');
+    }
+
+    function onClickDetail(row_id) {
+      alert('detail ' + row_id);
+      $("#modal-default").modal('toggle');
+    }
+  </script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <section class="content-header">
+      <h1>
+        Data Tables
+        <small>advanced tables</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="#">Tables</a></li>
+        <li class="active">Data tables</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Data Table With Full Features</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                  <th>ACTION</th>
+                  <th>DETAIL</th>
+                  <th>APPROVAL TYPE</th>
+                  <th>APPROVAL STATUS</th>
+                  <th>TEMPLATE CODE</th>
+                  <th>CREATED BY</th>
+                  <th>CREATED DATE</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="approval : ${approval_task_list}">
+                    <td>
+                        <button type="button" class="btn btn-success" th:attr="onclick='onClickApprove(\''+${approval.row_id}+'\')'">Approve</button>
+                        <button type="button" class="btn btn-danger" th:attr="onclick='onClickReject(\''+${approval.row_id}+'\')'">Reject</button>
+                    </td>
+                    <td>                      
+                        <button type="button" class="btn btn-primary" th:attr="onclick='onClickDetail(\''+${approval.row_id}+'\')'">Detail</button>
+                    </td>
+                    <td>[[${approval.approval_type}]]</td>
+                    <td>[[${approval.approval_status}]]</td>
+                    <td>[[${approval.template_code}]]</td>
+                    <td>[[${approval.approval_created_by}]]</td>
+                    <td>[[${approval.approval_created_date}]]</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th>ACTION</th>
+                    <th>DETAIL</th>
+                    <th>APPROVAL TYPE</th>
+                    <th>APPROVAL STATUS</th>
+                    <th>TEMPLATE CODE</th>
+                    <th>CREATED BY</th>
+                    <th>CREATED DATE</th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>    
+</div>
+<div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Export Type</h4>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control" th:placeholder="Message" id="rejection_message" />
+          <input type="hidden" id="reject_row_id" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="rejectProcess()">Reject</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  
+<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script>
+  $(function () {
+    $('#example1').DataTable({
+      "order": []
+    })
+  })
+</script>
+</body>
+</html>

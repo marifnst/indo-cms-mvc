@@ -1,6 +1,7 @@
 package com.indocms.mvcapp.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -20,8 +20,21 @@ public class MenuService {
     @Value("${app.database.service}")
     private String databaseService;
 
+    @Value("${app.breadcrumb.delimiter}")
+    private String breadcrumbDelimiter;
+
     @Autowired
     private SessionService sessionService;
+
+    public Map<String, Object> getSessionMenu(String url) throws Exception {
+        List<Map<String, Object>> parentMenuList = (List<Map<String, Object>>) sessionService.getSession(url);
+        Map<String, Object> menuPermission = parentMenuList.get(0);
+
+        String breadcrumb = menuPermission.get("menu_breadcrumb").toString();
+        menuPermission.put("menu_breadcrumb_list", Arrays.asList(breadcrumb.split("\\" + breadcrumbDelimiter)));
+
+        return menuPermission;
+    }
     
     public List<Map<String, Object>> getMenu() throws Exception {
         List<Map<String, Object>> parentMenuList = new ArrayList<>();

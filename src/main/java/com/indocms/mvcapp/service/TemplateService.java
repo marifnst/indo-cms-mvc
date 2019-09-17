@@ -50,6 +50,9 @@ public class TemplateService {
     private ApprovalService approvalService;
 
     @Autowired
+    private SessionService sessionService;
+
+    @Autowired
     private GeneralService generalService;
 
     // private Map<String, Object> templateHeader = null;
@@ -65,14 +68,16 @@ public class TemplateService {
         output.put("template_detail", templateDetail);
 
         String url = "template/view/" + templateCode;
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();        
-        List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) attr.getRequest().getSession().getAttribute(url);
-        Map<String, Object> menuPermission = menuPermissionList.get(0);
-
-        String breadcrumb = menuPermission.get("menu_breadcrumb").toString();
-        menuPermission.put("menu_breadcrumb_list", Arrays.asList(breadcrumb.split("\\" + breadcrumbDelimiter)));        
-
+        // ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();        
+        // List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) attr.getRequest().getSession().getAttribute(url);
+        // Map<String, Object> menuPermission = menuPermissionList.get(0);        
+        List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) sessionService.getSession(url);
         List<Map<String, Object>> templateData = this.getTemplateData(templateHeader, templateDetail, menuPermissionList);
+
+        Map<String, Object> menuPermission = menuService.getSessionMenu(url);
+        // String breadcrumb = menuPermission.get("menu_breadcrumb").toString();
+        // menuPermission.put("menu_breadcrumb_list", Arrays.asList(breadcrumb.split("\\" + breadcrumbDelimiter)));
+
         output.put("template_data", templateData);
         output.put("menu", menuPermission);
         // output.put("can_insert", canInsert);
@@ -83,7 +88,7 @@ public class TemplateService {
     }
 
     //#region create service
-    public Map<String, Object> createService(String templateCode) throws Exception {
+    public Map<String, Object> createService(String templateCode, String url) throws Exception {
         Map<String, Object> output = new HashMap<>();
 
         Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);
@@ -99,7 +104,16 @@ public class TemplateService {
             }
         }
 
+        // List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) sessionService.getSession(url);
+        // Map<String, Object> menuPermission = menuPermissionList.get(0);
+
+        // String breadcrumb = menuPermission.get("menu_breadcrumb").toString();
+        // menuPermission.put("menu_breadcrumb_list", Arrays.asList(breadcrumb.split("\\" + breadcrumbDelimiter)));
+
+        Map<String, Object> menuPermission = menuService.getSessionMenu(url);
+
         output.put("template_detail", templateDetail);
+        output.put("menu", menuPermission);
 
         return output;
     }
@@ -159,7 +173,7 @@ public class TemplateService {
     //#endregion create servcie
 
     //#region edit service
-    public Map<String, Object> editService(String templateCode, String dataId) throws Exception {
+    public Map<String, Object> editService(String templateCode, String dataId, String url) throws Exception {
         Map<String, Object> output = new HashMap<>();
 
         Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);
@@ -177,7 +191,9 @@ public class TemplateService {
             }
         }
         
+        Map<String, Object> menuPermission = menuService.getSessionMenu(url);
         output.put("template_detail", templateDetail);
+        output.put("menu", menuPermission);
 
         return output;
     }
