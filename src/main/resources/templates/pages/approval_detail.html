@@ -1,0 +1,35 @@
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="table_detail" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>COLUMN NAME</th>
+                    <th>DATA BEFORE</th>
+                    <th>DATA AFTER</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="column : ${payload.template_detail}" th:if="${payload.approval_data_before[__${column.database_column}__] != null or payload.approval_data_after[__${column.database_column}__] != null}">
+                    <td th:if="${payload.approval_data_before[__${column.database_column}__] != null or payload.approval_data_after[__${column.database_column}__] != null}" th:text="${column.web_column}"></td>
+                    <td th:if="${payload.approval_data_before[__${column.database_column}__] != null or payload.approval_data_after[__${column.database_column}__] != null}" th:text="${payload.approval_data_before[__${column.database_column}__] != null} ? ${payload.approval_data_before[__${column.database_column}__]} : ''"></td>
+                    <td th:if="${payload.approval_data_before[__${column.database_column}__] != null or payload.approval_data_after[__${column.database_column}__] != null}" th:text="${payload.approval_data_after[__${column.database_column}__] != null} ? ${payload.approval_data_after[__${column.database_column}__]} : ''"></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>    

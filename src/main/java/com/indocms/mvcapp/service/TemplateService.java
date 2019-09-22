@@ -235,7 +235,8 @@ public class TemplateService {
             List<Map<String, Object>> templateDetail = this.getTemplateDetail(templateCode, templateDetailFilter);
 
             Map<String, Object> dataBefore = this.getDataById(templateHeader, templateDetail, dataId);
-            approvalService.crudApprovalnjection(templateCode, "UPDATE", "'" + dataBefore.toString() + "'", "'" + payload + "'", "NULL", query.toString());
+            String dataBeforeString = new ObjectMapper().writeValueAsString(dataBefore);
+            approvalService.crudApprovalnjection(templateCode, "UPDATE", "'" + dataBeforeString + "'", "'" + payload + "'", "NULL", query.toString());
             output.put("status", "Success");
             output.put("message", "Edit Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {
@@ -269,8 +270,9 @@ public class TemplateService {
             List<Map<String, Object>> templateDetail = this.getTemplateDetail(templateCode, templateDetailFilter);
 
             Map<String, Object> dataBefore = this.getDataById(templateHeader, templateDetail, dataId);
+            String dataBeforeString = new ObjectMapper().writeValueAsString(dataBefore);
 
-            approvalService.crudApprovalnjection(templateCode, "DELETE", "'" + dataBefore.toString() + "'", "NULL", "NULL", query.toString());
+            approvalService.crudApprovalnjection(templateCode, "DELETE", "'" + dataBeforeString + "'", "NULL", "NULL", query.toString());
             output.put("status", "Success");
             output.put("message", "Delete Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {

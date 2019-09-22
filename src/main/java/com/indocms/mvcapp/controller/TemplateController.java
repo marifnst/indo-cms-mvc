@@ -95,6 +95,7 @@ public class TemplateController {
             Map<String, Object> outputService = templateService.editService(templateCode, dataId, viewUrlTemplatePrefix + templateCode);
             output.addObject("payload", outputService);
             output.addObject("url", "template/edit/process/" + templateCode + "/" + dataId);
+            output.addObject("url_cancel", viewUrlTemplatePrefix + templateCode);
         } catch (Exception e) {
             e.printStackTrace();
         }        

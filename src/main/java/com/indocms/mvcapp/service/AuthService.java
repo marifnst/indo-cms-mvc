@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,14 @@ public class AuthService {
         String output = null;
         UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         output = auth.getName();
+        return output;
+    }
+
+    public String getCurrentUserRole() {
+        String output = null;
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        List<GrantedAuthority> grantedAuthorityList = (List<GrantedAuthority>) auth.getAuthorities();
+        output = grantedAuthorityList.get(0).getAuthority();
         return output;
     }
 }

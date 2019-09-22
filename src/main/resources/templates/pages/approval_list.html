@@ -5,8 +5,24 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
   <script type="text/javascript">
-    function onClickApprove(row_id) {
-      alert('approve ' + row_id);      
+    function onClickApprove(url) {
+      // alert('approve ' + row_id);
+      $.ajax({
+        type: "post",
+        url: url,
+        success: function(responseData, textStatus, jqXHR) {
+            alert(responseData.message);
+            navigateToUrl(responseData.url);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status == "403") {
+            navigateToUrl('general/unauthorized');
+          } else {
+            alert(jqXHR.responseText);
+            navigateToUrl('general/error');
+          }
+        }
+      });
     }
 
     function onClickReject(row_id) {
@@ -16,13 +32,97 @@
     }
 
     function rejectProcess() {
-      alert($("#reject_row_id").val());
+      // alert($("#reject_row_id").val());
+      var data = {"message" : $("#reject_message").val()};
+      $.ajax({
+        type: "post",        
+        url: $("#reject_url").val() + $("#reject_row_id").val(),
+        data: JSON.stringify(data),
+        contentType: "application/json",
+        success: function(responseData, textStatus, jqXHR) {
+            alert(responseData.message);
+            navigateToUrl(responseData.url);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status == "403") {
+            navigateToUrl('general/unauthorized');
+          } else {
+            alert(jqXHR.trace);
+            navigateToUrl('general/error');
+          }
+        }
+      });
+
       $("#modal-default").modal('toggle');
     }
 
-    function onClickDetail(row_id) {
-      alert('detail ' + row_id);
-      $("#modal-default").modal('toggle');
+    function onClickDetail(url) {
+      // alert('detail ' + url);
+      $.ajax({
+        type: "post",        
+        url: url,
+        success: function(responseData, textStatus, jqXHR) {
+            // alert(responseData);
+            $("#modal-approval-detail").html(responseData);
+            $('#table_detail').DataTable({});
+            $("#modal-detail").modal('toggle');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status == "403") {
+            navigateToUrl('general/unauthorized');
+          } else {
+            alert(jqXHR.responseText);
+            navigateToUrl('general/error');
+          }
+        }
+      });      
+    }
+
+    function onClickDownloadDetail(url) {
+      // alert('download detail ' + url);
+
+      data = {};
+      // Use XMLHttpRequest instead of Jquery $ajax
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+          var a;
+          if (xhttp.readyState === 4) {
+            switch(xhttp.status) {
+              case 200:{
+                // Trick for making downloadable link
+                a = document.createElement('a');
+                a.href = window.URL.createObjectURL(xhttp.response);
+                // Give filename you wish to download
+                a.download = xhttp.getResponseHeader("filename");
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();                
+                break;
+              }
+              case 403:{
+                navigateToUrl('general/unauthorized');
+                break;
+              }
+              case 500:{
+                navigateToUrl('general/error');
+                break;
+              }
+            }
+          }
+
+          if (xhttp.readyState === 2) { 
+            switch(xhttp.status) {
+              case 500:{
+                request.responseType = "text";
+                break;
+              }
+            }
+          }
+      };
+      xhttp.open("POST", url);
+      xhttp.responseType = 'blob';
+      xhttp.setRequestHeader("Content-Type", "application/json");
+      xhttp.send();
     }
   </script>
 </head>
@@ -65,11 +165,12 @@
                 <tbody>
                   <tr th:each="approval : ${approval_task_list}">
                     <td>
-                        <button type="button" class="btn btn-success" th:attr="onclick='onClickApprove(\''+${approval.row_id}+'\')'">Approve</button>
+                        <button type="button" class="btn btn-success" th:attr="onclick='onClickApprove(\'' + ${approve_url} + ${approval.row_id}+'\')'">Approve</button>
                         <button type="button" class="btn btn-danger" th:attr="onclick='onClickReject(\''+${approval.row_id}+'\')'">Reject</button>
                     </td>
                     <td>                      
-                        <button type="button" class="btn btn-primary" th:attr="onclick='onClickDetail(\''+${approval.row_id}+'\')'">Detail</button>
+                        <button th:if="${approval.approval_type != 'IMPORT'}" type="button" class="btn btn-primary" th:attr="onclick='onClickDetail(\'' + ${detail_url} + ${approval.row_id}+'\')'">Detail</button>
+                        <button th:if="${approval.approval_type == 'IMPORT'}" type="button" class="btn btn-primary" th:attr="onclick='onClickDownloadDetail(\'' + ${download_detail_url} + ${approval.row_id}+'\')'">Download Detail</button>
                     </td>
                     <td>[[${approval.approval_type}]]</td>
                     <td>[[${approval.approval_status}]]</td>
@@ -101,26 +202,44 @@
     </section>    
 </div>
 <div class="modal fade" id="modal-default">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">Export Type</h4>
-        </div>
-        <div class="modal-body">
-          <input type="text" class="form-control" th:placeholder="Message" id="rejection_message" />
-          <input type="hidden" id="reject_row_id" />
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" onclick="rejectProcess()">Reject</button>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Rejection Form</h4>
       </div>
-      <!-- /.modal-content -->
+      <div class="modal-body">
+        <input type="text" class="form-control" th:placeholder="Message" id="reject_message" />
+        <input type="hidden" id="reject_row_id" />
+        <input type="hidden" id="reject_url" th:value="${reject_url}" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="rejectProcess()">Reject</button>
+      </div>
     </div>
-    <!-- /.modal-dialog -->
+    <!-- /.modal-content -->
   </div>
+  <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-detail">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Approval Detail</h4>
+      </div>
+      <div class="modal-body" id="modal-approval-detail">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
   
 <script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
 <script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
