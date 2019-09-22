@@ -1,0 +1,41 @@
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="table_detail" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>ROW ID</th>
+                    <th>APPROVAL STATUS</th>
+                    <th>APPROVER USER NAME</th>
+                    <th>APPROVER ROLE</th>
+                    <th>APPROVER DATE</th>
+                    <th>APPROVER MESSAGE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="row : ${approval_history_list}">
+                    <td th:text="${row.row_id}"></td>
+                    <td th:text="${row.approval_status}"></td>
+                    <td th:text="${row.approval_username}"></td>
+                    <td th:text="${row.approval_role}"></td>
+                    <td th:text="${row.approval_date}"></td>
+                    <td th:text="${row.approval_message}"></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>    

@@ -27,6 +27,9 @@ public class ApprovalService {
     private TemplateService templateService;
 
     @Autowired
+    private ImportService importService;
+
+    @Autowired
     private AuthService authService;
 
     @Autowired
@@ -61,6 +64,19 @@ public class ApprovalService {
         // Map<String, Object> output = new HashMap<>();
         // output.put("approval_task_list", approvalTaskList);
         return approvalTaskList;
+    }
+
+    public List<Map<String, Object>> getApprovalHistory() throws Exception {
+        String username = authService.getCurrentUser();
+        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_CREATED_BY = '%s' ORDER BY APPROVAL_CREATED_DATE DESC", username);
+        List<Map<String, Object>> approvalTaskList = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+        return approvalTaskList;
+    }
+
+    public List<Map<String, Object>> getApprovalDetailHistory(String approvalId) throws Exception {
+        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_DETAIL WHERE APPROVAL_HEADER_ID = '%s' ORDER BY APPROVAL_DATE", approvalId);
+        List<Map<String, Object>> output = DatabaseFactoryService.getService(databaseService).executeQuery(query);
+        return output;
     }
 
     public Map<String, Object> getApprovalDetail(String approvalId) throws Exception {
@@ -123,17 +139,41 @@ public class ApprovalService {
             switch(approvalType) {
                 case "SINGLE_USER_APPROVAL": case "SINGLE_ROLE_APPROVAL" : {
                     approvalQuery = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE row_id = %s", approvalId);
-                    System.out.println("approvalQuery : " + approvalQuery);
+                    // System.out.println("approvalQuery : " + approvalQuery);
                     Map<String, Object> approvalHeaderData = DatabaseFactoryService.getService(databaseService).executeQuery(approvalQuery).get(0);
 
                     String templateCode = approvalHeaderData.get("template_code").toString();
                     Map<String, Object> templateHeader = templateService.getTemplateHeader(templateCode);
-                    approvalQuery = approvalHeaderData.get("approval_query").toString();
-                    templateHeader.put("query", approvalQuery);
 
-                    DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
-                    isFinalApproval = true;
-                    System.out.println("approvalQuery : " + approvalQuery);
+                    String approvalType = approvalHeaderData.get("approval_type").toString();
+
+                    switch (approvalType) {
+                        case "IMPORT": {
+                            String importFilePath = approvalHeaderData.get("approval_data_import").toString();
+                            String importFileExtension = generalService.getFileExtension(importFilePath).toLowerCase();
+                            switch(importFileExtension.toLowerCase()) {
+                                case "csv":{                
+                                    importService.importCSV(templateCode, importFilePath);
+                                    break;
+                                }
+                                case "xls":case "xlsx": {
+                                    importService.importExcel(templateCode, importFilePath);
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                        default:{
+                            approvalQuery = approvalHeaderData.get("approval_query").toString();
+                            templateHeader.put("query", approvalQuery);
+                            System.out.println("approvalQuery : " + approvalQuery);
+        
+                            DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+                            break;
+                        }
+                    }
+
+                    isFinalApproval = true;                    
                     break;
                 }
             }

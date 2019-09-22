@@ -27,6 +27,13 @@ dynamic menu
 	approval
 other
 	table with long column
+approval
+	approval list
+	approval process (approve, reject, import)
+	approval history
+	single (user & role) & multi (user & role)
+log
 dashboard
 document management
-
+payroll
+notification

@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.indocms.mvcapp.model.LoginModel;
+import com.indocms.mvcapp.service.AuthService;
 import com.indocms.mvcapp.service.MenuService;
+import com.indocms.mvcapp.service.SessionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -28,6 +30,9 @@ public class AuthController {
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired
+    private AuthService authService;
 
     // @GetMapping("/")
     // public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
@@ -106,12 +111,20 @@ public class AuthController {
             // UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();            
             // System.out.println(auth.getName() + " : " + auth.getPrincipal() + " : " + auth.getAuthorities() + " : " + auth.getDetails() + " : " + auth.getCredentials());
             
+            Map<String, Object> userInfo = authService.getCurrentUserInfo();
+            System.out.println("userInfo : " + userInfo);
             List<Map<String, Object>> menu = menuService.getMenuByAuthority();
             output.addObject("menu", menu);
+            output.addObject("user", userInfo);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return output;
+    }
+
+    @GetMapping("/dashboard")
+    public ModelAndView dashboard() {
+        return new ModelAndView("dashboard");
     }
 
     @GetMapping("/profile")

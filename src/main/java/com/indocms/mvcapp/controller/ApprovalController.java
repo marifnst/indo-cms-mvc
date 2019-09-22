@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.indocms.mvcapp.service.ApprovalService;
+import com.indocms.mvcapp.service.MenuService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -27,17 +28,23 @@ public class ApprovalController {
     @Autowired
     private ApprovalService approvalService;
 
+    @Autowired
+    private MenuService menuService;
+
     @PreAuthorize("hasPermission('approval/list', 'view')")
     @GetMapping("/approval/list")
     public ModelAndView approvalList() {
         ModelAndView output = new ModelAndView("pages/approval_list");
         try {
             List<Map<String, Object>> approvalTaskList = approvalService.getApprovalTaskList();
+            Map<String, Object> menuPermission = menuService.getSessionMenu("approval/list");
+
             output.addObject("approval_task_list", approvalTaskList);
             output.addObject("detail_url", "/approval/detail/");
             output.addObject("download_detail_url", "/approval/download/detail/");
             output.addObject("approve_url", "/approval/approve/");
             output.addObject("reject_url", "/approval/reject/");
+            output.addObject("menu", menuPermission);
         } catch (Exception e) {
             e.printStackTrace();            
         }        
@@ -75,5 +82,37 @@ public class ApprovalController {
             .contentLength(file.length())
             .contentType(MediaType.parseMediaType("application/octet-stream"))
             .body(resource);
+    }
+
+    @PreAuthorize("hasPermission('approval/history', 'view')")
+    @GetMapping("/approval/history")
+    public ModelAndView approvalHistoryList() {
+        ModelAndView output = new ModelAndView("pages/approval_list");
+        try {
+            List<Map<String, Object>> approvalHistory = approvalService.getApprovalHistory();
+            output.addObject("approval_task_list", approvalHistory);
+            output.addObject("detail_url", "/approval/detail/");
+            output.addObject("download_detail_url", "/approval/download/detail/");
+            output.addObject("detail_history_url", "/approval/detail/history/");
+
+            Map<String, Object> menuPermission = menuService.getSessionMenu("approval/history");
+            output.addObject("menu", menuPermission);
+
+        } catch (Exception e) {
+            e.printStackTrace();            
+        }        
+        return output;
+    }
+
+    @PostMapping("/approval/detail/history/{approvalId}")
+    public ModelAndView approvalHistoryDetail(@PathVariable String approvalId) {
+        ModelAndView output = new ModelAndView("pages/approval_detail_hist");
+        try {
+            System.out.println("approval detail : " + approvalId);            
+            output.addObject("approval_history_list", approvalService.getApprovalDetailHistory(approvalId));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }        
+        return output;
     }
 }

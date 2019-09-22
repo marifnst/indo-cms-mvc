@@ -63,6 +63,7 @@
         url: url,
         success: function(responseData, textStatus, jqXHR) {
             // alert(responseData);
+            $(".modal-dialog").css("width","600px");
             $("#modal-approval-detail").html(responseData);
             $('#table_detail').DataTable({});
             $("#modal-detail").modal('toggle');
@@ -124,19 +125,41 @@
       xhttp.setRequestHeader("Content-Type", "application/json");
       xhttp.send();
     }
+
+    function onClickHistDetail(url) {
+      // alert('detail ' + url);
+      $.ajax({
+        type: "post",        
+        url: url,
+        success: function(responseData, textStatus, jqXHR) {
+            // alert(responseData);
+            $(".modal-dialog").css("width","1000px");
+            $("#modal-approval-detail").html(responseData);
+            $('#table_detail').DataTable({});
+            $("#modal-detail").modal('toggle');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status == "403") {
+            navigateToUrl('general/unauthorized');
+          } else {
+            alert(jqXHR.responseText);
+            navigateToUrl('general/error');
+          }
+        }
+      });      
+    }
   </script>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 
     <section class="content-header">
       <h1>
-        Data Tables
-        <small>advanced tables</small>
+          [[${menu.menu_title}]]
+          <small>[[${menu.menu_subtitle}]]</small>
       </h1>
       <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li><a href="#">Tables</a></li>
-        <li class="active">Data tables</li>
+          <li><i class="fa fa-dashboard"></i></li>
+          <li th:each="breadcrumb : ${menu.menu_breadcrumb_list}" class="active">[[${breadcrumb}]]</li>
       </ol>
     </section>
 
@@ -146,14 +169,14 @@
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header">
-              <h3 class="box-title">Data Table With Full Features</h3>
+              <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
             </div>
             <!-- /.box-header -->
             <div class="box-body">
               <table id="example1" class="table table-bordered table-striped">
                 <thead>
                 <tr>
-                  <th>ACTION</th>
+                  <th th:text="${approve_url != null or reject_url != null ? 'ACTION' : ''}"></th>
                   <th>DETAIL</th>
                   <th>APPROVAL TYPE</th>
                   <th>APPROVAL STATUS</th>
@@ -165,12 +188,13 @@
                 <tbody>
                   <tr th:each="approval : ${approval_task_list}">
                     <td>
-                        <button type="button" class="btn btn-success" th:attr="onclick='onClickApprove(\'' + ${approve_url} + ${approval.row_id}+'\')'">Approve</button>
-                        <button type="button" class="btn btn-danger" th:attr="onclick='onClickReject(\''+${approval.row_id}+'\')'">Reject</button>
+                        <button th:if="${approve_url != null}" type="button" class="btn btn-success" th:attr="onclick='onClickApprove(\'' + ${approve_url} + ${approval.row_id}+'\')'">Approve</button>
+                        <button th:if="${reject_url != null}" type="button" class="btn btn-danger" th:attr="onclick='onClickReject(\''+${approval.row_id}+'\')'">Reject</button>
                     </td>
                     <td>                      
                         <button th:if="${approval.approval_type != 'IMPORT'}" type="button" class="btn btn-primary" th:attr="onclick='onClickDetail(\'' + ${detail_url} + ${approval.row_id}+'\')'">Detail</button>
                         <button th:if="${approval.approval_type == 'IMPORT'}" type="button" class="btn btn-primary" th:attr="onclick='onClickDownloadDetail(\'' + ${download_detail_url} + ${approval.row_id}+'\')'">Download Detail</button>
+                        <button th:if="${detail_history_url != null and approval.approval_status != 'PENDING'}" type="button" class="btn btn-primary" th:attr="onclick='onClickHistDetail(\'' + ${detail_history_url} + ${approval.row_id}+'\')'">History Detail</button>
                     </td>
                     <td>[[${approval.approval_type}]]</td>
                     <td>[[${approval.approval_status}]]</td>
@@ -181,7 +205,7 @@
                 </tbody>
                 <tfoot>
                 <tr>
-                    <th>ACTION</th>
+                    <th th:text="${approve_url != null or reject_url != null ? 'ACTION' : ''}"></th>
                     <th>DETAIL</th>
                     <th>APPROVAL TYPE</th>
                     <th>APPROVAL STATUS</th>
