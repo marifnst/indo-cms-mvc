@@ -43,6 +43,7 @@ public class TemplateController {
             // output.addObject("url_create", "template/create/" + templateCode);
             // output.addObject("url_import", "template/import/" + templateCode);
             // output.addObject("url_export", "template/export/" + templateCode);
+            output.addObject("url_view", viewUrlTemplatePrefix + templateCode);
             output.addObject("url_create", createUrlTemplatePrefix + templateCode);
             output.addObject("url_import", importUrlTemplatePrefix + templateCode);
             output.addObject("url_export", exportUrlTemplatePrefix + templateCode);

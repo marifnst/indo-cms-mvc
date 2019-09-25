@@ -21,8 +21,8 @@ dynamic menu
 	add
 	edit
 	delete
-	export (hide dialog)
-	import
+	export (hide dialog) + dynamic path
+	import + dynamic path
 	detail
 	approval
 other

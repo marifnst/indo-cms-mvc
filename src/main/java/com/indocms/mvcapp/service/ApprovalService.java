@@ -58,7 +58,28 @@ public class ApprovalService {
 
     public List<Map<String, Object>> getApprovalTaskList() throws Exception {
         // String username = authService.getCurrentUser();
-        StringBuilder query = new StringBuilder("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_STATUS = 'PENDING' ORDER BY APPROVAL_CREATED_DATE DESC");
+        // StringBuilder query = new StringBuilder("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_STATUS = 'PENDING' ORDER BY APPROVAL_CREATED_DATE DESC");
+        String currentUser = authService.getCurrentUser();
+        String currentUserRole = authService.getCurrentUserRole();
+        StringBuilder query = new StringBuilder("SELECT A.* FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER A");                
+        
+        switch (approvalType) {
+            case "SINGLE_USER_APPROVAL" : {                
+                query.append(" INNER JOIN \"INDO_CMS\".PUBLIC.INDO_CMS_USER_APPROVER B ON");
+                query.append(" A.APPROVAL_CREATED_BY = B.USERNAME AND B.APPROVER_USERNAME = '").append(currentUser).append("'");
+                break;
+            }
+            case "SINGLE_ROLE_APPROVAL" : {
+                query.append(" INNER JOIN \"INDO_CMS\".PUBLIC.INDO_CMS_USER B ON A.APPROVAL_CREATED_BY = B.USERNAME");
+                query.append(" INNER JOIN \"INDO_CMS\".PUBLIC.INDO_CMS_USER_APPROVER C ON B.ROLE_ID = C.ROLE_ID");
+                query.append(" AND C.APPROVER_ROLE = '").append(currentUserRole).append("'");
+                break;
+            }
+        }
+
+        query.append(" WHERE A.APPROVAL_STATUS = 'PENDING'");
+        query.append(" ORDER BY A.APPROVAL_CREATED_DATE DESC");
+
         List<Map<String, Object>> approvalTaskList = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
         // System.out.println("approvalTaskList : " + approvalTaskList);
         // Map<String, Object> output = new HashMap<>();

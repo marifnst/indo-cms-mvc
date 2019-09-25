@@ -40,6 +40,7 @@ public class ApprovalController {
             Map<String, Object> menuPermission = menuService.getSessionMenu("approval/list");
 
             output.addObject("approval_task_list", approvalTaskList);
+            output.addObject("refresh_url", "/approval/list");
             output.addObject("detail_url", "/approval/detail/");
             output.addObject("download_detail_url", "/approval/download/detail/");
             output.addObject("approve_url", "/approval/approve/");
@@ -51,6 +52,7 @@ public class ApprovalController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('approval/list', 'view')")
     @PostMapping("/approval/detail/{approvalId}")
     public ModelAndView approvalDetail(@PathVariable String approvalId) {
         ModelAndView output = new ModelAndView("pages/approval_detail");
@@ -63,6 +65,7 @@ public class ApprovalController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('approval/list', 'export')")
     @PostMapping("/approval/download/detail/{approvalId}")
     public ResponseEntity<Object> approvalDownloadDetail(@PathVariable String approvalId) throws Exception {
         String exportOutputPath = approvalService.getApprovalDownloadDetail(approvalId);
@@ -91,6 +94,7 @@ public class ApprovalController {
         try {
             List<Map<String, Object>> approvalHistory = approvalService.getApprovalHistory();
             output.addObject("approval_task_list", approvalHistory);
+            output.addObject("refresh_url", "/approval/history");
             output.addObject("detail_url", "/approval/detail/");
             output.addObject("download_detail_url", "/approval/download/detail/");
             output.addObject("detail_history_url", "/approval/detail/history/");
@@ -104,6 +108,7 @@ public class ApprovalController {
         return output;
     }
 
+    @PreAuthorize("hasPermission('approval/history', 'view')")
     @PostMapping("/approval/detail/history/{approvalId}")
     public ModelAndView approvalHistoryDetail(@PathVariable String approvalId) {
         ModelAndView output = new ModelAndView("pages/approval_detail_hist");

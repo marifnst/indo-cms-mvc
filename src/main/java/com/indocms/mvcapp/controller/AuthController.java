@@ -3,27 +3,20 @@ package com.indocms.mvcapp.controller;
 import java.util.List;
 import java.util.Map;
 
-import com.indocms.mvcapp.model.LoginModel;
+import com.indocms.mvcapp.service.ApprovalService;
 import com.indocms.mvcapp.service.AuthService;
 import com.indocms.mvcapp.service.MenuService;
-import com.indocms.mvcapp.service.SessionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 // import org.springframework.security.core.context.SecurityContextHolder;
 // import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
@@ -33,6 +26,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private ApprovalService approvalService;
 
     // @GetMapping("/")
     // public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
@@ -124,7 +120,14 @@ public class AuthController {
 
     @GetMapping("/dashboard")
     public ModelAndView dashboard() {
-        return new ModelAndView("dashboard");
+        ModelAndView output = new ModelAndView("dashboard");
+        try {
+            List<Map<String, Object>> approvalTaskList = approvalService.getApprovalTaskList();
+            output.addObject("approval_task_list_count", approvalTaskList.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return output;
     }
 
     @GetMapping("/profile")

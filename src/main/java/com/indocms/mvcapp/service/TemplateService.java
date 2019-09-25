@@ -277,6 +277,8 @@ public class TemplateService {
             output.put("message", "Delete Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {
             queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            output.put("status", "Success");
+            output.put("message", "Delete Data Success");
         }        
         System.out.println("queryOutput delete : " + queryOutput);
 

@@ -31,6 +31,16 @@ INSERT INTO "indo_cms_template_header"
 VALUES 
 ('INDO_CMS_TEMPLATE_DETAIL', '"INDO_CMS"', '.PUBLIC.', 'INDO_CMS_TEMPLATE_DETAIL', 'com.indocms.mvcapp.database.PostgreSQL', 'org.postgresql.Driver', 'jdbc:postgresql://172.24.0.2:5432/INDO_CMS', 'postgres', 'password');
 
+INSERT INTO "indo_cms_template_header" 
+("template_code", "database_name", "database_table_delimiter", "table_name", "database_service", "database_classname", "database_connection_string", "database_username", "database_password")
+VALUES 
+('INDO_CMS_JOB_HEADER', '"INDO_CMS"', '.PUBLIC.', 'INDO_CMS_JOB_HEADER', 'com.indocms.mvcapp.database.PostgreSQL', 'org.postgresql.Driver', 'jdbc:postgresql://172.24.0.2:5432/INDO_CMS', 'postgres', 'password');
+
+INSERT INTO "indo_cms_template_header" 
+("template_code", "database_name", "database_table_delimiter", "table_name", "database_service", "database_classname", "database_connection_string", "database_username", "database_password")
+VALUES 
+('INDO_CMS_JOB_DETAIL', '"INDO_CMS"', '.PUBLIC.', 'INDO_CMS_JOB_DETAIL', 'com.indocms.mvcapp.database.PostgreSQL', 'org.postgresql.Driver', 'jdbc:postgresql://172.24.0.2:5432/INDO_CMS', 'postgres', 'password');
+
 -- ############################################################################3
 
 INSERT INTO "indo_cms_template_header" 
