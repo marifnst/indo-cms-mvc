@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  <link rel="stylesheet" href="bower_components/datatables.net-bs/css/select.dataTables.min.css">
+  <script type="text/javascript">
+    function executeJob() {
+      var rows_selected = table.column(0).checkboxes.selected();
+      if (rows_selected.length > 0) {
+        $.each(rows_selected, function(index, rowId){
+          alert(rowId);
+        });
+      }
+      // if (selectedJob.length > 0) {        
+      //   $.ajax({
+      //       url: "job/execute",  
+      //       method: 'post',
+      //       data: JSON.stringify({"job" : selectedJob}),
+      //       contentType: "application/json",
+      //       success: function(responseData, textStatus, jqXHR) {
+      //           alert(responseData);
+      //       },
+      //       error: function(jqXHR, textStatus, errorThrown) {
+      //         if (jqXHR.status == "403") {
+      //           navigateToUrl('general/unauthorized');
+      //         } else {
+      //           alert(jqXHR.responseText);
+      //           navigateToUrl('general/error');
+      //         }
+      //       }
+      //     });
+      //   } else {
+      //     alert("Please Select At Least One Job");
+      //   }
+    }
+  </script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <section class="content-header">
+      <h1>
+          [[${menu.menu_title}]]
+          <small>[[${menu.menu_subtitle}]]</small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><i class="fa fa-dashboard"></i></li>
+          <li th:each="breadcrumb : ${menu.menu_breadcrumb_list}" class="active">[[${breadcrumb}]]</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
+            </div>
+            <button type="button" class="btn btn-primary" style="margin-left: 1em" th:attr="onclick='navigateToUrl(\''+${refresh_url}+'\')'">Refresh</button>
+            <button type="button" class="btn btn-primary" style="margin-left: 1em" id="exec_button">Execute</button>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>JOB ID</th>
+                    <th>JOB DESCRIPTION</th>
+                    <th>JOB STATUS</th>
+                    <th>JOB START BY</th>
+                    <th>JOB START DATE</th>
+                    <th>JOB END DATE</th>
+                    <th>JOB MESSAGE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="job : ${jobs}">
+                    <td></td>
+                    <td th:text="${job.job_id}"></td>
+                    <td th:text="${job.job_description}"></td>
+                    <td th:text="${job.job_status != null ? job.job_status : ''}"></td>
+                    <td th:text="${job.job_start_by != null ? job.job_start_by : ''}"></td>
+                    <td th:text="${job.job_start_date != null ? job.job_start_date : ''}"></td>
+                    <td th:text="${job.job_end_date != null ? job.job_end_date : ''}"></td>
+                    <td>
+                      <button th:if="${job.job_status == 'Success' or job.job_status == 'Failed'}" type="button" class="btn" th:classappend="${job.job_status == 'Success'} ? btn-success : btn-danger" th:attr="onclick='showMessage(\''+${job.job_id}+'\')'">Message</button>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th></th>
+                    <th>JOB ID</th>
+                    <th>JOB DESCRIPTION</th>
+                    <th>JOB STATUS</th>
+                    <th>JOB START BY</th>
+                    <th>JOB START DATE</th>
+                    <th>JOB END DATE</th>
+                    <th>JOB MESSAGE</th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>    
+</div>
+
+<div class="modal fade" id="modal-default">
+  <div class="modal-dialog" style="display: table;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Job Message</h4>
+      </div>
+      <div class="modal-body" style="white-space: pre;">
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="bower_components/datatables.net/js/dataTables.select.min.js"></script>
+<script>
+  var selectedJob = [];
+  $(function () {
+      var table = $("#example1").DataTable({
+        "stateSave": true,
+        "pagingType": "full_numbers",
+        "columnDefs": [ {
+            "orderable": false,
+            "className": 'select-checkbox',
+            "targets": 0
+        } ],
+        "select": {
+            "style": 'os',
+            "selector": 'td:first-child',
+            'style': 'multi'
+        },
+        "order": [],
+        "createdRow": function ( row, data, index ) {
+          if (data[3] == "In Progress") {
+            $('td', row).eq(0).removeClass('select-checkbox');
+          } 
+          // else if (data[3] != "") {
+          //   $('td', row).eq(7).html("<button class='btn btn-primary'>Message</button>");
+          // }
+        }
+    });
+
+    $("#exec_button").click(function() {
+      // alert( table.rows('.selected').data().length +' row(s) selected' );
+      if (table.rows('.selected').data().length > 0) {
+        var isExecute = confirm("Are You Sure To Execute The Job ?");
+        if (isExecute) {
+          var data = [];
+          $.each(table.rows('.selected').data(), function(index, rowId) {
+            // alert(rowId[1]);
+            data.push(rowId[1]);
+          });
+          $.ajax({
+            url: "job/execute",  
+            method: 'post',
+            data: JSON.stringify({"data" : data}),
+            contentType: "application/json",
+            success: function(responseData, textStatus, jqXHR) {
+                alert(responseData.message);
+                navigateToUrl(responseData.url);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              if (jqXHR.status == "403") {
+                navigateToUrl('general/unauthorized');
+              } else {
+                alert(jqXHR.responseText);
+                navigateToUrl('general/error');
+              }
+            }
+          });
+        }
+      } else {
+        alert("Please Select At Least One Job");
+      }
+    });
+  })
+
+  function showMessage(jobId) {
+    // alert("show message " + jobId);
+    $.ajax({
+      url: "job/message/" + jobId,  
+      method: 'post',
+      success: function(responseData, textStatus, jqXHR) {
+          $(".modal-body").html("<span>" + responseData.message + "</span>");
+          $("#modal-default").modal('toggle');
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        if (jqXHR.status == "403") {
+          navigateToUrl('general/unauthorized');
+        } else {
+          alert(jqXHR.responseText);
+          navigateToUrl('general/error');
+        }
+      }
+    });
+  }
+</script>
+</body>
+</html>

@@ -11,16 +11,9 @@
     $(function () {
       $('#example1').DataTable({
         "scrollX": true,
-        "order": []
-      });
-
-      $('#example2').DataTable({
-        'paging'      : true,
-        'lengthChange': false,
-        'searching'   : false,
-        'ordering'    : true,
-        'info'        : true,
-        'autoWidth'   : false
+        "order": [],
+        "stateSave": true,
+        "pagingType": "full_numbers"
       });
 
       $('#import').change(function() {

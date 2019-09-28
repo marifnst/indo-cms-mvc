@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.indocms.mvcapp.service.ApprovalService;
 import com.indocms.mvcapp.service.AuthService;
+import com.indocms.mvcapp.service.JobService;
 import com.indocms.mvcapp.service.MenuService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class AuthController {
 
     @Autowired
     private ApprovalService approvalService;
+
+    @Autowired
+    private JobService jobService;
 
     // @GetMapping("/")
     // public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
@@ -124,6 +128,9 @@ public class AuthController {
         try {
             List<Map<String, Object>> approvalTaskList = approvalService.getApprovalTaskList();
             output.addObject("approval_task_list_count", approvalTaskList.size());
+
+            List<Map<String, Object>> runningJobList = jobService.getRunningJob();
+            output.addObject("running_job_count", runningJobList.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
