@@ -60,7 +60,7 @@ public class MenuService {
         String query = String.format("SELECT A.MENU_ID, A.MENU_URL_TITLE, A.MENU_URL "+
         "FROM INDO_CMS_MENU A " + 
         "INNER JOIN INDO_CMS_MENU_PERMISSION B ON A.MENU_ID = B.MENU_ID "
-        + " WHERE A.MENU_PARENT_ID IS NULL AND B.CAN_VIEW = '1' AND B.ROLE_ID = '%s' ORDER BY A.MENU_SEQUENCE", authority);
+        + " WHERE (A.MENU_PARENT_ID IS NULL OR A.MENU_PARENT_ID = '''') AND B.CAN_VIEW = '1' AND B.ROLE_ID = '%s' ORDER BY A.MENU_SEQUENCE", authority);
         parentMenuList = DatabaseFactoryService.getService(databaseService).executeQuery(query);
         
         for (Map<String, Object> parentMenu : parentMenuList) {

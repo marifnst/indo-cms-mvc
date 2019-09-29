@@ -1,0 +1,104 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+  <link rel="stylesheet" href="bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+
+  <link rel="stylesheet" href="bower_components/select2/dist/css/select2.min.css">
+
+  <script type="text/javascript">
+    $("form").submit(function( event ) {
+      event.preventDefault();
+
+      if ($(document.activeElement).val() == "cancel") {
+        navigateToUrl($('#url_cancel').text());
+      } else {
+        var form = $('#myform')[0];
+        var data = new FormData(form);
+
+        $.ajax({
+          url: $("#myform").prop("action"),  
+          method: 'post',
+          data: data,
+          cache: false,
+          contentType: false,
+          processData: false,
+          success : function(responseData, textStatus, jqXHR){
+            alert(responseData.message);
+            navigateToUrl($('#url_cancel').text());
+          },
+          error : function(jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status == "403") {
+              navigateToUrl('general/unauthorized');
+            } else {
+              alert(jqXHR.responseText);
+              navigateToUrl('general/error');
+            }
+          }
+        });
+      }
+    });
+  </script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+          [[${menu.menu_title}]]
+          <small>[[${menu.menu_subtitle}]]</small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><i class="fa fa-dashboard"></i></li>
+          <li th:each="breadcrumb : ${menu.menu_breadcrumb_list}" class="active">[[${breadcrumb}]]</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+          <div class="box box-primary">            
+              <!-- <form action="template/create/process/TEMPLATE_CODE" method="POST" class="form-horizontal" id="myform"> -->
+              <form th:action="${url}" method="POST" class="form-horizontal" id="myform">              
+                <div class="box-body">
+                  <div class="form-group">
+                    <label class="col-sm-2 control-label" style="width: 10%;">Document Name</label>
+                    <div class="col-sm-10">
+                      <input type="text" maxlength="" class="form-control" placeholder="Document Name" name="document_name" th:value="${document != null and document.containsKey('document_name') != null ? document.document_name : ''}" />
+                    </div>                      
+                  </div>
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label" style="width: 10%;">Document Description</label>
+                      <div class="col-sm-10">
+                        <input type="text" maxlength="" class="form-control" placeholder="Document Description" name="document_description" th:value="${document != null and document.containsKey('document_description') != null ? document.document_description : ''}" />
+                      </div>                      
+                  </div>
+                  <div class="form-group">
+                      <label class="col-sm-2 control-label" style="width: 10%;">Document File</label>
+                      <div class="col-sm-10">
+                        <input type="file" placeholder="Document File" name="document_file" />
+                      </div>                      
+                  </div>
+                </div>
+                <div class="box-footer">
+                  <button name="submit" value="cancel"  type="submit" class="btn btn-info">Cancel</button>
+                  <button name="submit" value="submit" type="submit" class="btn btn-info">Submit</button>
+                </div>
+              </form>
+              <div id="url_cancel" th:text="${url_cancel != null } ? ${url_cancel} : ''" style="display: none;"></div>
+          </div>
+      </div>
+    </section>
+
+  <!-- <script src="js/jquery-3.4.1.min.js"></script> -->
+  <script src="bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+  <script src="bower_components/select2/dist/js/select2.full.min.js"></script>
+  <script>
+    $('.datepicker').datepicker({
+      autoclose: true
+    });
+    $('.select2').select2();
+  </script>
+</body>
+</html>

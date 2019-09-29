@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  <script type="text/javascript">
+  </script>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+    <section class="content-header">
+      <h1>
+          [[${menu.menu_title}]]
+          <small>[[${menu.menu_subtitle}]]</small>
+      </h1>
+      <ol class="breadcrumb">
+          <li><i class="fa fa-dashboard"></i></li>
+          <li th:each="breadcrumb : ${menu.menu_breadcrumb_list}" class="active">[[${breadcrumb}]]</li>
+      </ol>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <!-- <h3 class="box-title">Data Table With Full Features</h3> -->
+            </div>
+            <button type="button" class="btn btn-primary" style="margin-left: 1em" th:attr="onclick='navigateToUrl(\''+${url_refresh}+'\')'">Refresh</button>
+            <button type="button" class="btn btn-primary" style="margin-left: 1em" th:attr="onclick='navigateToUrl(\''+${url_create}+'\')'">Add Document</button>            
+            <!-- /.box-header -->
+            <div class="box-body">
+              <table id="example1" class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                  <th></th>
+                  <th>ROW ID</th>
+                  <th>DOCUMENT NAME</th>
+                  <th>DOCUMENT DESCRIPTION</th>
+                  <th>DOCUMENT EXT TYPE</th>
+                  <th>DOCUMENT SIZE</th>
+                  <th>DOCUMENT CREATED BY</th>
+                  <th>DOCUMENT CREATED DATE</th>
+                  <th>DOCUMENT MODIFIED BY</th>
+                  <th>DOCUMENT MODIFIED DATE</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="document : ${document_list}">
+                    <td style="white-space: nowrap;">
+                      <button class="btn btn-primary" th:attr="onclick='navigateToUrl(\'' + ${url_edit} + ${document.row_id} + '\')'">Edit</button>
+                      <button class="btn btn-danger" th:attr="onclick='deleteProcess(\'' + ${url_delete} + ${document.row_id} + '\')'">Delete</button>
+                      <button class="btn btn-success" th:attr="onclick='downloadProcess(\'' + ${url_download} + ${document.row_id} + '\')'">Download</button>
+                    </td>
+                    <td>[[${document.row_id}]]</td>
+                    <td>[[${document.document_name}]]</td>
+                    <td>[[${document.document_description}]]</td>
+                    <td>[[${document.document_ext_type}]]</td>
+                    <td>[[${document.document_size}]]</td>
+                    <td>[[${document.document_created_by}]]</td>
+                    <td>[[${document.document_created_date}]]</td>
+                    <td>[[${document.document_modified_by}]]</td>
+                    <td>[[${document.document_modified_date}]]</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                  <th></th>
+                  <th>ROW ID</th>
+                  <th>DOCUMENT NAME</th>
+                  <th>DOCUMENT DESCRIPTION</th>
+                  <th>DOCUMENT EXT TYPE</th>
+                  <th>DOCUMENT SIZE</th>
+                  <th>DOCUMENT CREATED BY</th>
+                  <th>DOCUMENT CREATED DATE</th>
+                  <th>DOCUMENT MODIFIED BY</th>
+                  <th>DOCUMENT MODIFIED DATE</th>
+                </tr>
+                </tfoot>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>    
+</div>
+<div class="modal fade" id="modal-default">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Rejection Form</h4>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" th:placeholder="Message" id="reject_message" />
+        <input type="hidden" id="reject_row_id" />
+        <input type="hidden" id="reject_url" th:value="${reject_url}" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="rejectProcess()">Reject</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-detail">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Approval Detail</h4>
+      </div>
+      <div class="modal-body" id="modal-approval-detail">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default pull-left" id="close_button" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+<script src="bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script>
+  $(function () {
+    $('#example1').DataTable({
+      "order": [],
+      "scrollX": true,
+      "stateSave": true,
+      "pagingType": "full_numbers"
+    });
+  })
+
+  function deleteProcess(url) {
+    var isConfirmed = confirm("Are You Sure To Delete Data ?");
+    if (isConfirmed) {
+      // alert(url);
+      $.ajax({
+        url: url,  
+        method: 'post',
+        success : function(responseData, textStatus, jqXHR){
+          alert(responseData.message);
+          navigateToUrl(responseData.url);
+        },
+        error : function(jqXHR, textStatus, errorThrown) {
+          if (jqXHR.status == "403") {
+            navigateToUrl('general/unauthorized');
+          } else {
+            alert(jqXHR.responseText);
+            navigateToUrl('general/error');
+          }
+        }
+      });
+    }
+  }
+
+  function downloadProcess(url) {
+    // alert(url);
+    data = {};
+
+    xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        var a;
+        if (xhttp.readyState === 4) {
+          switch(xhttp.status) {
+            case 200:{
+              // Trick for making downloadable link
+              a = document.createElement('a');
+              a.href = window.URL.createObjectURL(xhttp.response);
+              // Give filename you wish to download
+              a.download = xhttp.getResponseHeader("filename");
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();                
+              break;
+            }
+            case 403:{
+              navigateToUrl('general/unauthorized');
+              break;
+            }
+            case 500: {
+              navigateToUrl('general/error');
+              break;
+            }
+          }
+        }
+    };
+    xhttp.open("POST", url);
+    xhttp.responseType = 'blob';
+    xhttp.send(JSON.stringify(data));
+  }
+</script>
+</body>
+</html>

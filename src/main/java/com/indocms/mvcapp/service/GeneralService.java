@@ -1,5 +1,6 @@
 package com.indocms.mvcapp.service;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -38,5 +39,12 @@ public class GeneralService {
             return ""; // empty extension
         }
         return filename.substring(lastIndexOf + 1);
+    }
+
+    public String getFileSizeInKB(File file) {
+        String output = null;
+        double bytes = file.length();
+        output = String.valueOf(bytes / 1024) + " KB";
+        return output;
     }
 }
