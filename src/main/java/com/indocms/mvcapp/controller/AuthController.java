@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.indocms.mvcapp.service.ApprovalService;
 import com.indocms.mvcapp.service.AuthService;
+import com.indocms.mvcapp.service.DocumentService;
 import com.indocms.mvcapp.service.JobService;
 import com.indocms.mvcapp.service.MenuService;
 
@@ -33,6 +34,9 @@ public class AuthController {
 
     @Autowired
     private JobService jobService;
+
+    @Autowired
+    private DocumentService documentService;
 
     // @GetMapping("/")
     // public ModelAndView defaultPage(@ModelAttribute("login_model_attribute") LoginModel loginModel) {
@@ -131,6 +135,9 @@ public class AuthController {
 
             List<Map<String, Object>> runningJobList = jobService.getRunningJob();
             output.addObject("running_job_count", runningJobList.size());
+
+            List<Map<String, Object>> documentList = documentService.viewDocument();
+            output.addObject("document_count", documentList.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
