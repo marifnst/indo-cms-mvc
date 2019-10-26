@@ -7,6 +7,21 @@ Indo-CMS-MVC demo can be found [here]([https://nameless-retreat-34821.herokuapp.
 > username : admin
 
 > password : admin
+# Features
+> Login and security with Spring Security
+
+> User & Role Management
+
+> Menu & Permission Management
+
+> Data Management (View, Add, Edit, Delete, Export & Import)
+
+> Approval Management
+
+> Job Management & Execution
+
+> Document Management
+
 # Installation
 > Install Java JDK 8
 
