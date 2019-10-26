@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ImportService {
+    @Value("${app.single.database}")
+    private boolean isSingleDatabase;
+
     @Value("${app.database.service}")
     private String databaseService;
 
@@ -112,14 +115,24 @@ public class ImportService {
                         System.out.println("queryUpdate : " + queryUpdate);
                         templateHeader.put("query", queryUpdate);
     
-                        queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                        // queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                        if (isSingleDatabase) {
+                            queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(queryUpdate.toString());
+                        } else {
+                            queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                        }                        
                         primaryKey.remove("primary_key_value");
                     } else {
                         String finalInsertQuery = queryInsertColumn.toString() + queryInsertValue.toString();
                         templateHeader.put("query", finalInsertQuery);
     
                         System.out.println("finalInsertQuery : " + finalInsertQuery);
-                        queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);                    
+                        // queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                        if (isSingleDatabase) { 
+                            queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(finalInsertQuery);
+                        } else {
+                            queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                        }
                     }
                 }
 
@@ -233,7 +246,12 @@ public class ImportService {
                     System.out.println(queryUpdate);
                     templateHeader.put("query", queryUpdate);
 
-                    queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                    // queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                    if (isSingleDatabase) {
+                        queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(queryUpdate.toString());
+                    } else {
+                        queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                    }
                     primaryKey.remove("primary_key_value");
                 } else {
                     queryInsertColumn.append(") VALUES (");
@@ -242,7 +260,12 @@ public class ImportService {
                     templateHeader.put("query", finalInsertQuery);
                     System.out.println(finalInsertQuery);
 
-                    queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                    // queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                    if (isSingleDatabase) {
+                        queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(finalInsertQuery);
+                    } else {
+                        queryExecResult = DatabaseFactoryService.getService(databaseService).executeUpdateImport(templateHeader);
+                    }
                 }
 
                 if (queryExecResult.get("status").toString().equalsIgnoreCase("failed")) {

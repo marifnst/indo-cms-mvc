@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ExportService {
+    @Value("${app.single.database}")
+    private boolean isSingleDatabase;
+
     @Value("${app.database.service}")
     private String databaseService;
 
@@ -89,7 +93,13 @@ public class ExportService {
             templateHeader.put("query", query);
             System.out.println("query export csv : " + query);
 
-            List<Map<String, Object>> rows = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            // List<Map<String, Object>> rows = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            List<Map<String, Object>> rows = new ArrayList<>();
+            if (isSingleDatabase) {
+                rows = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+            } else {                
+                rows = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            }            
 
             // generate data
             for (Map<String, Object> row : rows) {
@@ -166,7 +176,13 @@ public class ExportService {
             templateHeader.put("query", query);
             System.out.println("query export excel : " + query);
 
-            List<Map<String, Object>> rows = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            // List<Map<String, Object>> rows = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            List<Map<String, Object>> rows = new ArrayList<>();
+            if (isSingleDatabase) {
+                rows = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+            } else {
+                rows = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            }
 
             for (Map<String, Object> rowData : rows) {
                 row = sheet1.createRow(rowCount);

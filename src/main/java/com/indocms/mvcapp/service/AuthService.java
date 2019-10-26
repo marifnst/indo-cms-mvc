@@ -22,7 +22,7 @@ public class AuthService {
     
     public Map<String, Object> getUser(String username) throws Exception {
         Map<String, Object> output = new HashMap<>();
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_USER WHERE USERNAME = '%s'", username);
+        String query = String.format("SELECT * FROM INDO_CMS_USER WHERE USERNAME = '%s'", username);
         List<Map<String, Object>> queryUserResult = DatabaseFactoryService.getService(databaseService).executeQuery(query);
         if (queryUserResult.size() > 0) {
             output = queryUserResult.get(0);
@@ -50,7 +50,7 @@ public class AuthService {
         if (sessionService.getSession("user_info") == null) {
             UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
             String username = auth.getName();
-            String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_USER WHERE USERNAME = '%s'", username);
+            String query = String.format("SELECT * FROM INDO_CMS_USER WHERE USERNAME = '%s'", username);
             output = DatabaseFactoryService.getService(databaseService).executeQuery(query).get(0);
             sessionService.addSession("user_indo", output);
         } else {

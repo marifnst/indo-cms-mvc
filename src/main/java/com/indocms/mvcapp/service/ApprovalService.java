@@ -58,20 +58,20 @@ public class ApprovalService {
 
     public List<Map<String, Object>> getApprovalTaskList() throws Exception {
         // String username = authService.getCurrentUser();
-        // StringBuilder query = new StringBuilder("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_STATUS = 'PENDING' ORDER BY APPROVAL_CREATED_DATE DESC");
+        // StringBuilder query = new StringBuilder("SELECT * FROM INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_STATUS = 'PENDING' ORDER BY APPROVAL_CREATED_DATE DESC");
         String currentUser = authService.getCurrentUser();
         String currentUserRole = authService.getCurrentUserRole();
-        StringBuilder query = new StringBuilder("SELECT A.* FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER A");                
+        StringBuilder query = new StringBuilder("SELECT A.* FROM INDO_CMS_APPROVAL_HEADER A");                
         
         switch (approvalType) {
             case "SINGLE_USER_APPROVAL" : {                
-                query.append(" INNER JOIN \"INDO_CMS\".PUBLIC.INDO_CMS_USER_APPROVER B ON");
+                query.append(" INNER JOIN INDO_CMS_USER_APPROVER B ON");
                 query.append(" A.APPROVAL_CREATED_BY = B.USERNAME AND B.APPROVER_USERNAME = '").append(currentUser).append("'");
                 break;
             }
             case "SINGLE_ROLE_APPROVAL" : {
-                query.append(" INNER JOIN \"INDO_CMS\".PUBLIC.INDO_CMS_USER B ON A.APPROVAL_CREATED_BY = B.USERNAME");
-                query.append(" INNER JOIN \"INDO_CMS\".PUBLIC.INDO_CMS_USER_APPROVER C ON B.ROLE_ID = C.ROLE_ID");
+                query.append(" INNER JOIN INDO_CMS_USER B ON A.APPROVAL_CREATED_BY = B.USERNAME");
+                query.append(" INNER JOIN INDO_CMS_USER_APPROVER C ON B.ROLE_ID = C.ROLE_ID");
                 query.append(" AND C.APPROVER_ROLE = '").append(currentUserRole).append("'");
                 break;
             }
@@ -89,19 +89,19 @@ public class ApprovalService {
 
     public List<Map<String, Object>> getApprovalHistory() throws Exception {
         String username = authService.getCurrentUser();
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_CREATED_BY = '%s' ORDER BY APPROVAL_CREATED_DATE DESC", username);
+        String query = String.format("SELECT * FROM INDO_CMS_APPROVAL_HEADER WHERE APPROVAL_CREATED_BY = '%s' ORDER BY APPROVAL_CREATED_DATE DESC", username);
         List<Map<String, Object>> approvalTaskList = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
         return approvalTaskList;
     }
 
     public List<Map<String, Object>> getApprovalDetailHistory(String approvalId) throws Exception {
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_DETAIL WHERE APPROVAL_HEADER_ID = '%s' ORDER BY APPROVAL_DATE", approvalId);
+        String query = String.format("SELECT * FROM INDO_CMS_APPROVAL_DETAIL WHERE APPROVAL_HEADER_ID = '%s' ORDER BY APPROVAL_DATE", approvalId);
         List<Map<String, Object>> output = DatabaseFactoryService.getService(databaseService).executeQuery(query);
         return output;
     }
 
     public Map<String, Object> getApprovalDetail(String approvalId) throws Exception {
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE ROW_ID = '%s'", approvalId);
+        String query = String.format("SELECT * FROM INDO_CMS_APPROVAL_HEADER WHERE ROW_ID = '%s'", approvalId);
         Map<String, Object> approvalData = DatabaseFactoryService.getService(databaseService).executeQuery(query).get(0);
         String approvalDataBeforeString = approvalData.get("approval_data_before") != null ? approvalData.get("approval_data_before").toString() : "{}";
         String approvalDataAfterString = approvalData.get("approval_data_after") != null ? approvalData.get("approval_data_after").toString() : "{}";
@@ -125,7 +125,7 @@ public class ApprovalService {
 
     public String getApprovalDownloadDetail(String approvalId) throws Exception {
         String output = null;
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE ROW_ID = '%s'", approvalId);
+        String query = String.format("SELECT * FROM INDO_CMS_APPROVAL_HEADER WHERE ROW_ID = '%s'", approvalId);
         Map<String, Object> approvalData = DatabaseFactoryService.getService(databaseService).executeQuery(query).get(0);
         output = approvalData.get("approval_data_import").toString();
         return output;
@@ -133,7 +133,7 @@ public class ApprovalService {
 
     public void approvalProcess(String approvalStatus, String approvalId, String payload) throws Exception {        
         boolean isFinalApproval = false;
-        StringBuilder approvalDetailQuery = new StringBuilder("INSERT INTO \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_DETAIL");
+        StringBuilder approvalDetailQuery = new StringBuilder("INSERT INTO INDO_CMS_APPROVAL_DETAIL");
         approvalDetailQuery.append(" (APPROVAL_HEADER_ID, APPROVAL_STATUS, APPROVAL_USERNAME, APPROVAL_ROLE, APPROVAL_DATE, APPROVAL_MESSAGE)");
         approvalDetailQuery.append(" VALUES ");
         approvalDetailQuery.append("(%s,%s,%s,%s,%s,%s)");
@@ -159,7 +159,7 @@ public class ApprovalService {
         if (approvalStatus.contains("APPROVED")) {            
             switch(approvalType) {
                 case "SINGLE_USER_APPROVAL": case "SINGLE_ROLE_APPROVAL" : {
-                    approvalQuery = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER WHERE row_id = %s", approvalId);
+                    approvalQuery = String.format("SELECT * FROM INDO_CMS_APPROVAL_HEADER WHERE row_id = %s", approvalId);
                     // System.out.println("approvalQuery : " + approvalQuery);
                     Map<String, Object> approvalHeaderData = DatabaseFactoryService.getService(databaseService).executeQuery(approvalQuery).get(0);
 
@@ -201,7 +201,7 @@ public class ApprovalService {
         }
 
         if (isFinalApproval) {
-            approvalQuery = String.format("UPDATE \"INDO_CMS\".PUBLIC.INDO_CMS_APPROVAL_HEADER SET APPROVAL_STATUS = %s WHERE ROW_ID = %s", approvalStatus, approvalId);
+            approvalQuery = String.format("UPDATE INDO_CMS_APPROVAL_HEADER SET APPROVAL_STATUS = %s WHERE ROW_ID = %s", approvalStatus, approvalId);
             DatabaseFactoryService.getService(databaseService).executeUpdate(approvalQuery);
         }                
 

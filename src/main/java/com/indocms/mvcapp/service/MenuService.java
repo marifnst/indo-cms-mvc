@@ -38,12 +38,12 @@ public class MenuService {
     
     public List<Map<String, Object>> getMenu() throws Exception {
         List<Map<String, Object>> parentMenuList = new ArrayList<>();
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_MENU WHERE MENU_PARENT_ID IS NULL OR MENU_PARENT_ID = '''' ORDER BY MENU_SEQUENCE");
+        String query = String.format("SELECT * FROM INDO_CMS_MENU WHERE MENU_PARENT_ID IS NULL OR MENU_PARENT_ID = '''' ORDER BY MENU_SEQUENCE");
         parentMenuList = DatabaseFactoryService.getService(databaseService).executeQuery(query);
         
         for (Map<String, Object> parentMenu : parentMenuList) {
             String tmpParentId = parentMenu.get("menu_id").toString();
-            query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_MENU WHERE MENU_PARENT_ID = '%s' ORDER BY MENU_SEQUENCE", tmpParentId);
+            query = String.format("SELECT * FROM INDO_CMS_MENU WHERE MENU_PARENT_ID = '%s' ORDER BY MENU_SEQUENCE", tmpParentId);
             List<Map<String, Object>> childMenuList = DatabaseFactoryService.getService(databaseService).executeQuery(query);
             parentMenu.put("child", childMenuList);
         }

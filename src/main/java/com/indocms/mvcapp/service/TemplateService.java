@@ -23,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class TemplateService {
 
+    @Value("${app.single.database}")
+    private boolean isSingleDatabase;
+
     @Value("${app.database.service}")
     private String databaseService;
 
@@ -37,7 +40,7 @@ public class TemplateService {
 
     @Autowired
     private ImportService importService;
-    
+
     @Autowired
     private MenuService menuService;
 
@@ -63,9 +66,9 @@ public class TemplateService {
         output.put("template_detail", templateDetail);
 
         String url = "template/view/" + templateCode;
-        // ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();        
+        // ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         // List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) attr.getRequest().getSession().getAttribute(url);
-        // Map<String, Object> menuPermission = menuPermissionList.get(0);        
+        // Map<String, Object> menuPermission = menuPermissionList.get(0);
         List<Map<String, Object>> menuPermissionList = (List<Map<String, Object>>) sessionService.getSession(url);
         List<Map<String, Object>> templateData = this.getTemplateData(templateHeader, templateDetail, menuPermissionList);
 
@@ -118,13 +121,13 @@ public class TemplateService {
 
         HashMap<String,Object> payloadMap = new ObjectMapper().readValue(payload, HashMap.class);
         System.out.println("createProcessService : " + payloadMap);
-        
+
         Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);
 
         String databaseName = templateHeader.get("database_name").toString().trim();
         String databaseTableDelimiter = templateHeader.get("database_table_delimiter").toString().trim();
         String tableName = templateHeader.get("table_name").toString().trim();
-        
+
         StringBuilder query = new StringBuilder();
         StringBuilder queryValues = new StringBuilder("(");
 
@@ -143,7 +146,7 @@ public class TemplateService {
             }
             count++;
         }
-        query.append(")");        
+        query.append(")");
         queryValues.append(")");
 
         query.append(" VALUES ").append(queryValues.toString());
@@ -156,12 +159,16 @@ public class TemplateService {
             output.put("status", "Success");
             output.put("message", "Insert Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {
-            queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            if (isSingleDatabase) {
+                queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(query.toString());
+            } else {
+                queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            }
             output.put("status", "Success");
             output.put("message", "Insert Data Success");
-        }        
+        }
         System.out.println("queryOutput : " + queryOutput);
-        
+
         return output;
     }
 
@@ -185,7 +192,7 @@ public class TemplateService {
                 rowDetail.put("lookup_data", tmpLookupOutput);
             }
         }
-        
+
         Map<String, Object> menuPermission = menuService.getSessionMenu(url);
         output.put("template_detail", templateDetail);
         output.put("menu", menuPermission);
@@ -199,7 +206,7 @@ public class TemplateService {
         HashMap<String,Object> payloadMap = new ObjectMapper().readValue(payload, HashMap.class);
         System.out.println("editProcessService : " + payloadMap);
 
-        Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);        
+        Map<String, Object> templateHeader = this.getTemplateHeader(templateCode);
 
         String databaseName = templateHeader.get("database_name").toString().trim();
         String databaseTableDelimiter = templateHeader.get("database_table_delimiter").toString().trim();
@@ -208,7 +215,7 @@ public class TemplateService {
         StringBuilder query = new StringBuilder();
         query.append("UPDATE ").append(databaseName).append(databaseTableDelimiter).append(tableName);
         query.append(" SET ");
-        
+
         Set<String> keySet = payloadMap.keySet();
         int count = 0;
         for (String key : keySet) {
@@ -235,10 +242,15 @@ public class TemplateService {
             output.put("status", "Success");
             output.put("message", "Edit Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {
-            queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            if (isSingleDatabase) {
+                queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(query.toString());
+            } else {
+                queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            }
+            // queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
             output.put("status", "Success");
             output.put("message", "Edit Data Success");
-        }        
+        }
         // System.out.println("queryOutput edit : " + queryOutput);
         return output;
     }
@@ -271,16 +283,21 @@ public class TemplateService {
             output.put("status", "Success");
             output.put("message", "Delete Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {
-            queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            if (isSingleDatabase) {
+                queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(query.toString());
+            } else {
+                queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+            }
+            // queryOutput = DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
             output.put("status", "Success");
             output.put("message", "Delete Data Success");
-        }        
+        }
         System.out.println("queryOutput delete : " + queryOutput);
 
         return output;
     }
     //#endregion delete service
-    
+
     //#region export service
     public String exportProcessService(String templateCode, String payload) throws Exception {
         String output = null;
@@ -303,14 +320,14 @@ public class TemplateService {
     //#region import process
     public Map<String, String> importProcessService(String url, String templateCode, MultipartFile file) throws Exception {
         Map<String, String> output = new HashMap<>();
-        
+
         InputStream initialStream = file.getInputStream();
-        
+
         String importFileExtension = generalService.getFileExtension(file.getOriginalFilename()).toLowerCase();
         String exportPathString = "IMPORT_" + templateCode + "_" + generalService.convertDateToString(new Date(), exportPatternDate) + "." + importFileExtension;
 
         Path exportPath = Paths.get(exportPathString);
-        Files.copy(initialStream, exportPath, StandardCopyOption.REPLACE_EXISTING);        
+        Files.copy(initialStream, exportPath, StandardCopyOption.REPLACE_EXISTING);
         IOUtils.closeQuietly(initialStream);
 
         if (menuService.isNeedApproval(url)) {
@@ -319,7 +336,7 @@ public class TemplateService {
             output.put("message", "Import Request Has Been Submitted, Please Kindly Wait For Approval");
         } else {
             switch(importFileExtension.toLowerCase()) {
-                case "csv":{                
+                case "csv":{
                     importService.importCSV(templateCode, exportPathString);
                     break;
                 }
@@ -338,7 +355,7 @@ public class TemplateService {
 
     public Map<String, Object> getTemplateHeader(String templateCode) throws Exception {
         Map<String, Object> output = new HashMap<>();
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_TEMPLATE_HEADER WHERE TEMPLATE_CODE = '%s'", templateCode);
+        String query = String.format("SELECT * FROM INDO_CMS_TEMPLATE_HEADER WHERE TEMPLATE_CODE = '%s'", templateCode);
         List<Map<String, Object>> templateHeaderList = DatabaseFactoryService.getService(databaseService).executeQuery(query);
         if (templateHeaderList.size() > 0) {
             // System.out.println(templateHeaderList.get(0));
@@ -349,7 +366,7 @@ public class TemplateService {
 
     public List<Map<String, Object>> getTemplateDetail(String templateCode, String filter) throws Exception {
         List<Map<String, Object>> output = new ArrayList<>();
-        String query = String.format("SELECT * FROM \"INDO_CMS\".PUBLIC.INDO_CMS_TEMPLATE_DETAIL WHERE TEMPLATE_CODE = '%s' %s ORDER BY SEQUENCE", templateCode, filter);
+        String query = String.format("SELECT * FROM INDO_CMS_TEMPLATE_DETAIL WHERE TEMPLATE_CODE = '%s' %s ORDER BY SEQUENCE", templateCode, filter);
         output = DatabaseFactoryService.getService(databaseService).executeQuery(query);
         // System.out.println(output);
         return output;
@@ -361,7 +378,11 @@ public class TemplateService {
         if (lookupTemplate.get("lookup_query") != null && !lookupTemplate.get("lookup_query").toString().equals("")) {
             String query = lookupTemplate.get("lookup_query").toString();
             templateHeader.put("query", query);
-            output = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            if (isSingleDatabase) {
+                output = DatabaseFactoryService.getService(databaseService).executeQuery(query);
+            } else {
+                output = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+            }
         }
         // System.out.println(output);
         return output;
@@ -370,13 +391,13 @@ public class TemplateService {
     public List<Map<String, Object>> getTemplateData(Map<String, Object> templateHeader, List<Map<String, Object>> templateDetail, List<Map<String, Object>> menuPermissionList)  throws Exception {
         StringBuilder query = new StringBuilder();
         String templateCode = templateHeader.get("template_code").toString();
-                
+
         query.append("SELECT ");
 
         String editColumn = "CONCAT('<a href=\"#\" onclick=\"return navigateToUrl(''template/edit/" + templateCode + "/', row_id, ''')\">Edit</a>')";
 
         String deleteColumn = "CONCAT('<a href=\"#\" onclick=\"return deleteProcess(''template/delete/process/" + templateCode + "/', row_id, ''')\">Delete</a>')";
-        
+
         String canUpdate = menuPermissionList.get(0).get("can_update") != null && !menuPermissionList.get(0).get("can_update").equals("") ? menuPermissionList.get(0).get("can_update").toString() : "0";
         String canDelete = menuPermissionList.get(0).get("can_delete") != null && !menuPermissionList.get(0).get("can_delete").equals("") ? menuPermissionList.get(0).get("can_delete").toString() : "0";
 
@@ -408,7 +429,12 @@ public class TemplateService {
         // System.out.println(query);
         templateHeader.put("query", query);
 
-        List<Map<String, Object>> output = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        List<Map<String, Object>> output = new ArrayList<>();
+        if (isSingleDatabase) {
+            output = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+        } else {
+            output = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        }
         // System.out.println(output);
         return output;
     }
@@ -441,7 +467,13 @@ public class TemplateService {
         // System.out.println("get edit data query : " + query);
         templateHeader.put("query", query);
 
-        List<Map<String, Object>> selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        List<Map<String, Object>> selectOutput = new ArrayList<>();
+        if (isSingleDatabase) {
+            selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+        } else {
+            selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        }
+        // List<Map<String, Object>> selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
         Map<String, Object> mainData = selectOutput.get(0);
 
         int primaryIndex = 0;

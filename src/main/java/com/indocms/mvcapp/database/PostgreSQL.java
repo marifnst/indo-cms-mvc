@@ -102,6 +102,50 @@ public class PostgreSQL implements Database {
     }
 
     @Override
+    public Map<String, Object> executeUpdateImport(String query) throws Exception {
+        Connection connection = null;
+        Map<String, Object> output = new HashMap<>();
+
+        try {
+            String className = environment.getProperty("app.database.classname");
+            String connectionString = environment.getProperty("app.database.connection.string");
+            String username = environment.getProperty("app.database.username");
+            String password = environment.getProperty("app.database.password");
+    
+            // Class.forName("org.postgresql.Driver");
+            // Connection connection = DriverManager.getConnection("jdbc:postgresql://172.24.0.2:5432/INDO_CMS", "postgres", "password");
+            Class.forName(className);
+            connection = DriverManager.getConnection(connectionString, username, password);
+    
+            PreparedStatement preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+
+            while (resultSet.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1;i <= resultSetMetaData.getColumnCount();i++) {
+                    String columnLabel = resultSetMetaData.getColumnLabel(i);
+                    row.put(columnLabel, resultSet.getObject(i));
+                }
+                // output.add(row);
+                output.put("generated_key", row);
+            }
+            output.put("status", "Success");
+            output.put("message", "Execute Update Success");
+        } catch (Exception e) {
+            output.put("status", "Failed");
+            output.put("message", "Execute Update Failed");
+            output.put("stacktrace", generalService.getStringStacktrace(e));
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }            
+        }
+        return output;
+    }
+
+    @Override
     public Map<String, Object> executeUpdateImport(Map<String, Object> databaseProperty) throws Exception {
         Connection connection = null;
         Map<String, Object> output = new HashMap<>();
@@ -223,4 +267,5 @@ public class PostgreSQL implements Database {
     public String getType() {
         return PostgreSQL.class.getName();
     }
+
 }
