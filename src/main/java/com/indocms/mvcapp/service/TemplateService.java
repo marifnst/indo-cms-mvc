@@ -521,7 +521,13 @@ public class TemplateService {
         // System.out.println("get edit data query : " + query);
         templateHeader.put("query", query);
 
-        List<Map<String, Object>> selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        // List<Map<String, Object>> selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        List<Map<String, Object>> selectOutput = new ArrayList<>();
+        if (isSingleDatabase) {
+            selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(query.toString());
+        } else {
+            selectOutput = DatabaseFactoryService.getService(databaseService).executeQuery(templateHeader);
+        }        
         Map<String, Object> mainData = selectOutput.get(0);
 
         return mainData;

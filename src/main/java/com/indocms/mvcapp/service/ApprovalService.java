@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ApprovalService {
+    @Value("${app.single.database}")
+    private boolean isSingleDatabase;
 
     @Value("${app.database.service}")
     private String databaseService;
@@ -189,7 +191,12 @@ public class ApprovalService {
                             templateHeader.put("query", approvalQuery);
                             System.out.println("approvalQuery : " + approvalQuery);
         
-                            DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+                            // DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+                            if (isSingleDatabase) {
+                                DatabaseFactoryService.getService(databaseService).executeUpdate(approvalQuery);
+                            } else {
+                                DatabaseFactoryService.getService(databaseService).executeUpdate(templateHeader);
+                            }
                             break;
                         }
                     }
