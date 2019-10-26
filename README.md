@@ -23,6 +23,8 @@ Indo-CMS-MVC demo can be found [here](https://nameless-retreat-34821.herokuapp.c
 > Document Management
 
 # Installation
+> Install PostgreSQL
+
 > Install Java JDK 8
 
 > Install Maven
